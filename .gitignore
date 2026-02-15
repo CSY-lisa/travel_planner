@@ -1,0 +1,28 @@
+
+# Dependencies
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Environment variables (DO NOT REMOVE)
+.env
+.env.local
+.env.production
+.env.development
+
+# Local Data Mirror (Contains Sheet data)
+data/template_v2.csv
+
+# Build / Output
+dist/
+build/
+.next/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db

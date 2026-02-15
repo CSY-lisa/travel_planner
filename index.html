@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>2026 廣島深度旅 🇯🇵</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* 隱藏捲軸但保留滑動功能 */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        /* 地圖容器響應式 */
+        .map-container {
+            position: relative;
+            padding-bottom: 56.25%;
+            height: 0;
+            overflow: hidden;
+            border-radius: 0.5rem;
+        }
+
+        .map-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: 0;
+        }
+
+        body {
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .animate-fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50 text-gray-800 font-sans pb-20">
+
+    <header class="fixed top-0 w-full z-50 bg-white/95 backdrop-blur shadow-sm border-b border-gray-200">
+        <div class="flex justify-between items-center px-4 py-3">
+            <div>
+                <h1 class="text-lg font-bold text-teal-700">廣島深度旅 2026</h1>
+                <p class="text-xs text-gray-500">3/5 (四) - 3/13 (五)</p>
+            </div>
+            <a href="https://www.google.com/maps" target="_blank" class="text-2xl">🗺️</a>
+        </div>
+
+        <div class="flex overflow-x-auto whitespace-nowrap px-2 py-2 no-scrollbar bg-gray-50 border-t border-gray-200"
+            id="nav-container">
+            <button onclick="switchDay('overview')" data-target="overview"
+                class="nav-btn active bg-teal-600 text-white px-4 py-1.5 rounded-full text-sm font-bold shadow-md mr-2 flex-shrink-0 transition-all cursor-pointer">
+                📅 總覽
+            </button>
+            <button onclick="switchDay('day1')" data-target="day1"
+                class="nav-btn bg-white text-gray-600 border border-gray-300 px-4 py-1.5 rounded-full text-sm font-medium mr-2 flex-shrink-0 transition-all cursor-pointer">3/5</button>
+            <button onclick="switchDay('day2')" data-target="day2"
+                class="nav-btn bg-white text-gray-600 border border-gray-300 px-4 py-1.5 rounded-full text-sm font-medium mr-2 flex-shrink-0 transition-all cursor-pointer">3/6</button>
+            <button onclick="switchDay('day3')" data-target="day3"
+                class="nav-btn bg-white text-gray-600 border border-gray-300 px-4 py-1.5 rounded-full text-sm font-medium mr-2 flex-shrink-0 transition-all cursor-pointer">3/7</button>
+            <button onclick="switchDay('day4')" data-target="day4"
+                class="nav-btn bg-white text-gray-600 border border-gray-300 px-4 py-1.5 rounded-full text-sm font-medium mr-2 flex-shrink-0 transition-all cursor-pointer">3/8</button>
+            <button onclick="switchDay('day5')" data-target="day5"
+                class="nav-btn bg-white text-gray-600 border border-gray-300 px-4 py-1.5 rounded-full text-sm font-medium mr-2 flex-shrink-0 transition-all cursor-pointer">3/9</button>
+            <button onclick="switchDay('day6')" data-target="day6"
+                class="nav-btn bg-white text-gray-600 border border-gray-300 px-4 py-1.5 rounded-full text-sm font-medium mr-2 flex-shrink-0 transition-all cursor-pointer">3/10</button>
+            <button onclick="switchDay('day7')" data-target="day7"
+                class="nav-btn bg-white text-gray-600 border border-gray-300 px-4 py-1.5 rounded-full text-sm font-medium mr-2 flex-shrink-0 transition-all cursor-pointer">3/11</button>
+            <button onclick="switchDay('day8')" data-target="day8"
+                class="nav-btn bg-white text-gray-600 border border-gray-300 px-4 py-1.5 rounded-full text-sm font-medium mr-2 flex-shrink-0 transition-all cursor-pointer">3/12</button>
+            <button onclick="switchDay('day9')" data-target="day9"
+                class="nav-btn bg-white text-gray-600 border border-gray-300 px-4 py-1.5 rounded-full text-sm font-medium mr-2 flex-shrink-0 transition-all cursor-pointer">3/13</button>
+        </div>
+    </header>
+
+    <div class="h-28"></div>
+
+    <main class="max-w-md mx-auto min-h-screen relative">
+        <div id="main-content">
+            <!-- Dynamic Content Loaded Here -->
+            <div class="flex justify-center items-center h-64">
+                <div class="animate-pulse text-teal-600">Loading Journey...</div>
+            </div>
+        </div>
+    </main>
+
+    <script src="js/app.js"></script>
+    <script>
+        // Inline script for manual nav button clicks if needed, 
+        // though app.js handles most. Keeping simple nav switch for reference.
+        function switchDay(targetId) {
+            window.location.hash = targetId === 'overview' ? '#overview' : '#' + targetId;
+        }
+    </script>
+</body>
+
+</html>
