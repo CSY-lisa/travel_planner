@@ -4,6 +4,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+    <!-- 網頁資安防護 (Security Headers) -->
+    <!-- 限制腳本、樣式、圖片只能從信任的來源載入，防止 XSS 注入攻擊 -->
+    <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; frame-src https://www.google.com https://maps.google.com;">
+    <!-- 防止網址洩漏來源資訊 -->
+    <meta name="referrer" content="no-referrer-when-downgrade">
+
     <title>2026 廣島深度旅 🇯🇵</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
