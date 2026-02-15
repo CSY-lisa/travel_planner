@@ -6,11 +6,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
     <!-- 網頁資安防護 (Security Headers) -->
-    <!-- 限制腳本、樣式、圖片只能從信任的來源載入，防止 XSS 注入攻擊 -->
+    <!-- 1. CSP: 限制資源來源，防範 XSS 攻擊 -->
     <meta http-equiv="Content-Security-Policy"
         content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; frame-src https://www.google.com https://maps.google.com; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self';">
-    <!-- 防止網址洩漏來源資訊 -->
-    <meta name="referrer" content="no-referrer-when-downgrade">
+    <!-- 2. 防止網址洩漏來源路徑資訊 -->
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+    <!-- 3. 防止 MIME 類型嗅探 (防止偽裝成圖片的惡意腳本) -->
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <!-- 4. 權限政策：禁用不需要的硬體權限 (如攝影機、麥克風) -->
+    <meta http-equiv="Permissions-Policy" content="camera=(), microphone=(), geolocation=(self)">
 
     <title>2026 廣島深度旅 🇯🇵</title>
     <script src="https://cdn.tailwindcss.com"></script>

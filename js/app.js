@@ -304,8 +304,8 @@ function renderDailyView(container, dayIndex) {
                                 ${step.duration && step.duration !== '-' ? `<div class="flex gap-2"><span class="font-bold text-slate-500 min-w-[60px]">⏱️ 移動:</span> <span>${step.duration}</span></div>` : ''}
                                 ${step.transportFreq && step.transportFreq !== '-' ? `<div class="flex gap-2"><span class="font-bold text-slate-500 min-w-[60px]">🚌 班次:</span> <span>${step.transportFreq}</span></div>` : ''}
                                 <div class="pt-2 flex gap-2">
-                                ${step.attractionWebsite && step.attractionWebsite !== '-' ? `<a href="${step.attractionWebsite}" target="_blank" class="px-2 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200 font-bold border border-blue-200 transition-colors">🌐 官網</a>` : ''}
-                                ${step.link && step.link !== '-' && step.link !== step.attractionWebsite ? `<a href="${step.link}" target="_blank" class="px-2 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 font-bold border border-gray-300 transition-colors">🔗 連結</a>` : ''}
+                                ${step.attractionWebsite && step.attractionWebsite !== '-' ? `<a href="${step.attractionWebsite}" target="_blank" rel="noopener noreferrer" class="px-2 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200 font-bold border border-blue-200 transition-colors">🌐 官網</a>` : ''}
+                                ${step.link && step.link !== '-' && step.link !== step.attractionWebsite ? `<a href="${step.link}" target="_blank" rel="noopener noreferrer" class="px-2 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 font-bold border border-gray-300 transition-colors">🔗 連結</a>` : ''}
                                 </div>
                             </div>
                         </div>
