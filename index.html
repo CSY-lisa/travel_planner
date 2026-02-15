@@ -7,14 +7,16 @@
     <title>2026 廣島深度旅 🇯🇵</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* 隱藏捲軸但保留滑動功能 */
-        .no-scrollbar::-webkit-scrollbar {
-            display: none;
-        }
+        /* 隱藏捲軸但保留滑動功能 (僅手機版) */
+        @media (max-width: 768px) {
+            .no-scrollbar::-webkit-scrollbar {
+                display: none;
+            }
 
-        .no-scrollbar {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
+            .no-scrollbar {
+                -ms-overflow-style: none;
+                scrollbar-width: none;
+            }
         }
 
         /* 地圖容器響應式 */
@@ -54,13 +56,34 @@
                 transform: translateY(0);
             }
         }
+
+        /* 左右輕微晃動動畫 */
+        @keyframes wiggle {
+
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+
+            25% {
+                transform: translateX(-3px);
+            }
+
+            75% {
+                transform: translateX(3px);
+            }
+        }
+
+        .animate-wiggle {
+            animation: wiggle 1.5s ease-in-out infinite;
+        }
     </style>
 </head>
 
 <body class="bg-gray-50 text-gray-800 font-sans pb-20">
 
     <header class="fixed top-0 w-full z-50 bg-white/95 backdrop-blur shadow-sm border-b border-gray-200">
-        <div class="flex justify-between items-center px-4 py-3">
+        <div class="flex justify-between items-center px-4 py-3 max-w-7xl mx-auto w-full">
             <div>
                 <h1 class="text-lg font-bold text-teal-700">廣島深度旅 2026</h1>
                 <p class="text-xs text-gray-500">3/5 (四) - 3/13 (五)</p>
@@ -68,7 +91,7 @@
             <a href="https://www.google.com/maps" target="_blank" class="text-2xl">🗺️</a>
         </div>
 
-        <div class="flex overflow-x-auto whitespace-nowrap px-2 py-2 no-scrollbar bg-gray-50 border-t border-gray-200"
+        <div class="flex overflow-x-auto whitespace-nowrap px-2 py-2 no-scrollbar bg-gray-50 border-t border-gray-200 justify-start md:justify-center"
             id="nav-container">
             <button onclick="switchDay('overview')" data-target="overview"
                 class="nav-btn active bg-teal-600 text-white px-4 py-1.5 rounded-full text-sm font-bold shadow-md mr-2 flex-shrink-0 transition-all cursor-pointer">
@@ -97,7 +120,7 @@
 
     <div class="h-28"></div>
 
-    <main class="max-w-md mx-auto min-h-screen relative">
+    <main class="w-full min-h-screen relative">
         <div id="main-content">
             <!-- Dynamic Content Loaded Here -->
             <div class="flex justify-center items-center h-64">
@@ -106,7 +129,7 @@
         </div>
     </main>
 
-    <script src="js/app.js"></script>
+    <script src="js/app.js?v=20260216"></script>
     <script>
         // Inline script for manual nav button clicks if needed, 
         // though app.js handles most. Keeping simple nav switch for reference.
