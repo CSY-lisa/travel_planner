@@ -19,12 +19,14 @@ jobs:
         node-version: '18'
         
     - name: Run Fetch Script
+      env:
+        SHEET_URL: ${{ secrets.SHEET_URL }}
       run: node scripts/fetch_data.js
       
     - name: Commit and Push
       run: |
         git config --global user.name 'GitHub Action'
         git config --global user.email 'action@github.com'
-        git add data/travel_data.json
+        git add --force data/travel_data.json
         # Only commit if there are changes
         git diff --quiet && git diff --staged --quiet || (git commit -m "Update travel data from Google Sheets" && git push)
