@@ -28,4 +28,4 @@ build/
 Thumbs.db
 
 # travel
-/data/
+/data/template_v2.csv
