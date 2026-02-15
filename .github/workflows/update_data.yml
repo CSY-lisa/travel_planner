@@ -2,7 +2,7 @@ name: Update Travel Data
 
 on:
   schedule:
-    - cron: '0 */6 * * *' # Run every 6 hours
+    - cron: '0 20 * * *' # 每天台灣時間凌晨 4 點更新一次 (20:00 UTC)
   workflow_dispatch: # Allow manual trigger
 
 jobs:
