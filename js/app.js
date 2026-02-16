@@ -179,7 +179,7 @@ function renderOverviewPeriod(day, periodName, color, icon) {
 
     // We categorize periods from data into the 3 buckets
     const targetPeriods = day.periods.filter(p => {
-        if (periodName === '早上') return p.period.includes('上');
+        if (periodName === '早上') return p.period.includes('早');
         if (periodName === '下午') return p.period.includes('下');
         if (periodName === '晚上') return p.period.includes('晚');
         return false;
