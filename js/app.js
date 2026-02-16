@@ -329,21 +329,21 @@ function renderDailyView(container, dayIndex) {
                     if (hasMap) {
                         html += `
                             <button onclick="toggleMap('${cardIdBase}-map')" class="flex items-center gap-1 text-xs font-bold text-blue-600 bg-blue-50 px-3 py-1.5 rounded-full border border-blue-100 hover:bg-blue-100 transition-colors">
-                                開啟地圖 🗺️+
+                                開啟地圖 🗺️▼
                             </button>
                         `;
                     }
                     if (hasAttractionInfo) {
                         html += `
                             <button onclick="toggleMap('${cardIdBase}-attr')" class="flex items-center gap-1 text-xs font-bold text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-full border border-emerald-100 hover:bg-emerald-100 transition-colors">
-                                景點資訊 ℹ️+
+                                景點資訊 ℹ️▼
                             </button>
                         `;
                     }
                     if (hasTransportInfo) {
                         html += `
                             <button onclick="toggleMap('${cardIdBase}-transport')" class="flex items-center gap-1 text-xs font-bold text-indigo-600 bg-indigo-50 px-3 py-1.5 rounded-full border border-indigo-100 hover:bg-indigo-100 transition-colors">
-                                交通資訊 🚇+
+                                交通資訊 🚇▼
                             </button>
                         `;
                     }
