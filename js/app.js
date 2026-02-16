@@ -256,11 +256,37 @@ function renderDailyView(container, dayIndex) {
         if (period.timeline && period.timeline.length > 0) {
             period.timeline.forEach((step, stepIndex) => {
                 const isTransport = step.type === '交通';
-                const cardId = 'detail-' + Math.random().toString(36).substr(2, 9);
+                const cardIdBase = 'card-' + Math.random().toString(36).substr(2, 9);
+
+                // Content Blocks
+                const transportContent = `
+                    <div class="space-y-2 text-xs text-gray-600">
+                        ${step.start && step.start !== '-' ? `<div class="flex gap-2"><span class="font-bold text-gray-500 min-w-[60px]">📍 起點:</span> <span>${step.start}</span></div>` : ''}
+                        ${step.end && step.end !== '-' ? `<div class="flex gap-2"><span class="font-bold text-gray-500 min-w-[60px]">🏁 終點:</span> <span>${step.end}</span></div>` : ''}
+                        ${step.duration && step.duration !== '-' ? `<div class="flex gap-2"><span class="font-bold text-gray-500 min-w-[60px]">⏱️ 移動:</span> <span>${step.duration}</span></div>` : ''}
+                        ${step.cost && step.cost !== '-' && step.cost !== '¥0' ? `<div class="flex gap-2"><span class="font-bold text-gray-500 min-w-[60px]">💰 票價:</span> <span>${step.cost}</span></div>` : ''}
+                        ${step.transportFreq && step.transportFreq !== '-' ? `<div class="flex gap-2"><span class="font-bold text-gray-500 min-w-[60px]">🚌 班次:</span> <span>${step.transportFreq}</span></div>` : ''}
+                        ${step.link && step.link !== '-' ? `<div class="flex gap-2 pt-1"><a href="${step.link}" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:text-blue-800 underline font-bold">🔗 交通官網/時刻表</a></div>` : ''}
+                    </div>
+                `;
+
+                const attractionContent = `
+                     <div class="space-y-2 text-xs text-gray-600">
+                        ${step.attractionDuration && step.attractionDuration !== '-' ? `<div class="flex gap-2"><span class="font-bold text-gray-500 min-w-[60px]">⏱️ 建議停留:</span> <span>${step.attractionDuration}</span></div>` : ''}
+                        ${step.attractionHours && step.attractionHours !== '-' ? `<div class="flex gap-2"><span class="font-bold text-gray-500 min-w-[60px]">🕒 營業時間:</span> <span>${step.attractionHours}</span></div>` : ''}
+                        ${step.attractionPrice && step.attractionPrice !== '-' ? `<div class="flex gap-2"><span class="font-bold text-gray-500 min-w-[60px]">💰 景點費用:</span> <span>${step.attractionPrice}</span></div>` : ''}
+                        ${step.attractionWebsite && step.attractionWebsite !== '-' ? `<div class="flex gap-2 pt-1"><a href="${step.attractionWebsite}" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:text-blue-800 underline font-bold">🌐 景點官網</a></div>` : ''}
+                     </div>
+                `;
+
+                // Check availability
+                const hasTransportInfo = (step.start && step.start !== '-') || (step.end && step.end !== '-') || (step.duration && step.duration !== '-') || (step.cost && step.cost !== '-' && step.cost !== '¥0') || (step.transportFreq && step.transportFreq !== '-') || (step.link && step.link !== '-');
+                const hasAttractionInfo = (step.attractionDuration && step.attractionDuration !== '-') || (step.attractionHours && step.attractionHours !== '-') || (step.attractionPrice && step.attractionPrice !== '-') || (step.attractionWebsite && step.attractionWebsite !== '-');
+                const hasMap = step.mapUrl;
 
                 html += `
                     <div class="relative group bg-white rounded-lg p-3 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-                        <!-- Step Dot (Removed absolute dot for cleaner card look inside timeline) -->
+                        <!-- Step Dot -->
                         <div class="absolute -left-[31px] top-6 w-2 h-2 bg-gray-300 rounded-full border border-white"></div>
                         
                         <div class="flex flex-col gap-2">
@@ -287,27 +313,78 @@ function renderDailyView(container, dayIndex) {
 
                             <!-- Action Buttons -->
                             <div class="flex flex-wrap gap-2 mt-3 pt-2 border-t border-gray-50">
-                                ${step.mapUrl ? renderMapButton(step.mapUrl) : ''}
-                                ${(step.attractionPrice || step.attractionHours || step.transportFreq || step.attractionDuration || (step.start && step.start !== '-')) ?
-                        `<button onclick="toggleMap('${cardId}')" class="flex items-center gap-1 text-xs font-bold text-teal-700 bg-teal-50 px-3 py-2 rounded-lg border border-teal-200 hover:bg-teal-100 transition-colors shadow-sm">
-                                        ℹ️ 查看詳情
-                                    </button>` : ''}
+                `;
+
+                // Render Buttons based on type
+                if (isTransport) {
+                    if (hasTransportInfo) {
+                        html += `
+                            <button onclick="toggleMap('${cardIdBase}-transport')" class="flex items-center gap-1 text-xs font-bold text-gray-600 bg-gray-100 px-3 py-1.5 rounded-full hover:bg-gray-200 transition-colors">
+                                查看詳情 ▼
+                            </button>
+                        `;
+                    }
+                } else {
+                    // Non-Transport Items: 3 separate buttons
+                    if (hasMap) {
+                        html += `
+                            <button onclick="toggleMap('${cardIdBase}-map')" class="flex items-center gap-1 text-xs font-bold text-blue-600 bg-blue-50 px-3 py-1.5 rounded-full border border-blue-100 hover:bg-blue-100 transition-colors">
+                                開啟地圖 🗺️+
+                            </button>
+                        `;
+                    }
+                    if (hasAttractionInfo) {
+                        html += `
+                            <button onclick="toggleMap('${cardIdBase}-attr')" class="flex items-center gap-1 text-xs font-bold text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-full border border-emerald-100 hover:bg-emerald-100 transition-colors">
+                                景點資訊 ℹ️+
+                            </button>
+                        `;
+                    }
+                    if (hasTransportInfo) {
+                        html += `
+                            <button onclick="toggleMap('${cardIdBase}-transport')" class="flex items-center gap-1 text-xs font-bold text-indigo-600 bg-indigo-50 px-3 py-1.5 rounded-full border border-indigo-100 hover:bg-indigo-100 transition-colors">
+                                交通資訊 🚇+
+                            </button>
+                        `;
+                    }
+                }
+
+                html += `
                             </div>
 
-                            <!-- Detail Card (Hidden by default) -->
-                            <div id="${cardId}" class="hidden mt-3 p-4 bg-slate-50 border border-slate-200 rounded-lg shadow-inner space-y-2 text-xs">
-                                ${step.attractionDuration && step.attractionDuration !== '-' ? `<div class="flex gap-2"><span class="font-bold text-slate-500 min-w-[60px]">⏱️ 停留:</span> <span>${step.attractionDuration}</span></div>` : ''}
-                                ${step.attractionHours && step.attractionHours !== '-' ? `<div class="flex gap-2"><span class="font-bold text-slate-500 min-w-[60px]">🕒 營業:</span> <span>${step.attractionHours}</span></div>` : ''}
-                                ${step.attractionPrice && step.attractionPrice !== '-' ? `<div class="flex gap-2"><span class="font-bold text-slate-500 min-w-[60px]">💰 費用:</span> <span>${step.attractionPrice}</span></div>` : ''}
-                                ${step.start && step.start !== '-' ? `<div class="flex gap-2"><span class="font-bold text-slate-500 min-w-[60px]">📍 起點:</span> <span>${step.start}</span></div>` : ''}
-                                ${step.end && step.end !== '-' ? `<div class="flex gap-2"><span class="font-bold text-slate-500 min-w-[60px]">🏁 終點:</span> <span>${step.end}</span></div>` : ''}
-                                ${step.duration && step.duration !== '-' ? `<div class="flex gap-2"><span class="font-bold text-slate-500 min-w-[60px]">⏱️ 移動:</span> <span>${step.duration}</span></div>` : ''}
-                                ${step.transportFreq && step.transportFreq !== '-' ? `<div class="flex gap-2"><span class="font-bold text-slate-500 min-w-[60px]">🚌 班次:</span> <span>${step.transportFreq}</span></div>` : ''}
-                                <div class="pt-2 flex gap-2">
-                                ${step.attractionWebsite && step.attractionWebsite !== '-' ? `<a href="${step.attractionWebsite}" target="_blank" rel="noopener noreferrer" class="px-2 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200 font-bold border border-blue-200 transition-colors">🌐 官網</a>` : ''}
-                                ${step.link && step.link !== '-' && step.link !== step.attractionWebsite ? `<a href="${step.link}" target="_blank" rel="noopener noreferrer" class="px-2 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 font-bold border border-gray-300 transition-colors">🔗 連結</a>` : ''}
-                                </div>
-                            </div>
+                            <!-- Detail Cards (Hidden by default) -->
+                `;
+
+                // Render Detail Sections
+
+                // Map Section
+                if (hasMap && !isTransport) { // Transport usually doesn't show map in this design unless requested, but let's stick to non-transport for map button as per request
+                    html += `
+                        <div id="${cardIdBase}-map" class="hidden mt-2 rounded-lg overflow-hidden shadow-inner bg-gray-100 w-full border border-gray-200">
+                             <iframe class="w-full h-48 border-0" loading="lazy" src="${step.mapUrl}"></iframe>
+                        </div>
+                     `;
+                }
+
+                // Attraction Info Section
+                if (hasAttractionInfo && !isTransport) {
+                    html += `
+                        <div id="${cardIdBase}-attr" class="hidden mt-2 p-3 bg-emerald-50/50 border border-emerald-100 rounded-lg">
+                            ${attractionContent}
+                        </div>
+                    `;
+                }
+
+                // Transport Info Section (Used for both)
+                if (hasTransportInfo) {
+                    html += `
+                        <div id="${cardIdBase}-transport" class="hidden mt-2 p-3 ${isTransport ? 'bg-gray-50 border-gray-200' : 'bg-indigo-50/50 border-indigo-100'} border rounded-lg">
+                            ${transportContent}
+                        </div>
+                    `;
+                }
+
+                html += `
                         </div>
                     </div>
                 `;

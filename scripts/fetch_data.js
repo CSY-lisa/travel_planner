@@ -137,7 +137,7 @@ function processData(rows) {
             event: get('活動標題'),
             description: get('內容詳情'),
             transportInfo: get('交通/票價資訊'),
-            cost: get('費用') !== '-' ? get('費用') : null,
+            cost: get('交通費用(JPY)') !== '-' ? get('交通費用(JPY)') : null,
             link: get('相關連結(官網/時刻表)'),
             mapUrl: getMapUrl(get('地點/導航')),
             start: get('起始站'),
