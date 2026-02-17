@@ -24,19 +24,35 @@ function initApp() {
 }
 
 function handleRouting() {
-    const hash = window.location.hash;
-    const mainContent = document.getElementById('main-content');
+  const hash = window.location.hash;
+  const mainContent = document.getElementById('main-content');
+  const dayNav = document.getElementById('nav-container');
 
-    if (!hash || hash === '#overview') {
-        renderOverview(mainContent);
-        updateNavState('overview');
-    } else if (hash.startsWith('#day')) {
-        const dayIndex = parseInt(hash.replace('#day', '')) - 1;
-        if (travelData[dayIndex]) {
-            renderDailyView(mainContent, dayIndex);
-            updateNavState(`day${dayIndex + 1}`);
-        }
+  // Day nav: only visible on itinerary tab
+  if (hash === '#reference' || hash === '#budget') {
+    dayNav.style.display = 'none';
+  } else {
+    dayNav.style.display = '';
+  }
+
+  if (!hash || hash === '#overview') {
+    renderOverview(mainContent);
+    updateNavState('overview');
+    updateTabState('itinerary');
+  } else if (hash.startsWith('#day')) {
+    const dayIndex = parseInt(hash.replace('#day', '')) - 1;
+    if (travelData[dayIndex]) {
+      renderDailyView(mainContent, dayIndex);
+      updateNavState(`day${dayIndex + 1}`);
+      updateTabState('itinerary');
     }
+  } else if (hash === '#reference') {
+    renderReferenceView(mainContent);
+    updateTabState('reference');
+  } else if (hash === '#budget') {
+    renderBudgetView(mainContent);
+    updateTabState('budget');
+  }
 }
 
 function updateNavState(activeId) {
@@ -51,6 +67,18 @@ function updateNavState(activeId) {
         activeBtn.className = "nav-btn active bg-teal-600 text-white px-4 py-1.5 rounded-full text-sm font-bold shadow-md mr-2 flex-shrink-0 transition-all cursor-pointer";
         activeBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
     }
+}
+
+function updateTabState(activeTab) {
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.classList.remove('text-teal-600', 'font-bold');
+    btn.classList.add('text-gray-400', 'font-medium');
+  });
+  const activeBtn = document.getElementById(`tab-${activeTab}`);
+  if (activeBtn) {
+    activeBtn.classList.remove('text-gray-400', 'font-medium');
+    activeBtn.classList.add('text-teal-600', 'font-bold');
+  }
 }
 
 // --- Renderers ---
@@ -468,3 +496,10 @@ window.toggleMap = function (id) {
     }
 };
 
+function renderBudgetView(container) {
+  container.innerHTML = '<div class="p-8 text-center text-gray-400">費用頁面 – 建置中</div>';
+}
+
+function renderReferenceView(container) {
+  container.innerHTML = '<div class="p-8 text-center text-gray-400">補充資料 – 建置中</div>';
+}

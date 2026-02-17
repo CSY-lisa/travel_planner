@@ -92,7 +92,7 @@
     </style>
 </head>
 
-<body class="bg-gray-50 text-gray-800 font-sans pb-20">
+<body class="bg-gray-50 text-gray-800 font-sans pb-16">
 
     <header class="fixed top-0 w-full z-50 bg-white/95 backdrop-blur shadow-sm border-b border-gray-200">
         <div class="flex justify-between items-center px-4 py-3 max-w-7xl mx-auto w-full">
@@ -142,12 +142,36 @@
     </main>
 
     <script src="js/app.js?v=20260216"></script>
+
+    <!-- Bottom Tab Bar -->
+    <nav class="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200 shadow-lg">
+      <div class="flex justify-around items-center h-14 max-w-7xl mx-auto px-4">
+        <button onclick="switchTab('itinerary')" id="tab-itinerary"
+          class="tab-btn flex flex-col items-center justify-center gap-0.5 flex-1 h-full text-teal-600 font-bold">
+          <span class="text-xl">🗓️</span>
+          <span class="text-[10px]">行程</span>
+        </button>
+        <button onclick="switchTab('reference')" id="tab-reference"
+          class="tab-btn flex flex-col items-center justify-center gap-0.5 flex-1 h-full text-gray-400 font-medium">
+          <span class="text-xl">📋</span>
+          <span class="text-[10px]">補充資料</span>
+        </button>
+        <button onclick="switchTab('budget')" id="tab-budget"
+          class="tab-btn flex flex-col items-center justify-center gap-0.5 flex-1 h-full text-gray-400 font-medium">
+          <span class="text-xl">💰</span>
+          <span class="text-[10px]">費用</span>
+        </button>
+      </div>
+    </nav>
+
     <script>
-        // Inline script for manual nav button clicks if needed, 
-        // though app.js handles most. Keeping simple nav switch for reference.
-        function switchDay(targetId) {
-            window.location.hash = targetId === 'overview' ? '#overview' : '#' + targetId;
-        }
+      function switchDay(targetId) {
+        window.location.hash = targetId === 'overview' ? '#overview' : '#' + targetId;
+      }
+      function switchTab(tab) {
+        if (tab === 'itinerary') window.location.hash = '#overview';
+        else window.location.hash = '#' + tab;
+      }
     </script>
 </body>
 
