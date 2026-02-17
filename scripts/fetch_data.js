@@ -20,7 +20,7 @@ const OUTPUT_PATH = path.join(__dirname, '../data/travel_data.json');
 const LOCAL_TSV_PATH = path.join(__dirname, '../data/itinerary_final.tsv');
 
 async function runSync() {
-    console.log('--- Travel Planner Sync (TSV) ---');
+    console.log('--- Travel Planner Sync (Robust TSV) ---');
     try {
         if (fs.existsSync(LOCAL_TSV_PATH)) {
             console.log(`Reading from local TSV: ${LOCAL_TSV_PATH}`);
@@ -66,32 +66,66 @@ function handleData(rawData) {
     console.log(`PROCESSED: ${jsonData.length} days.`);
 }
 
+/**
+ * Robust TSV Parser
+ * Handles quoted values containing tabs and newlines.
+ */
 function parseTSV(text) {
     const rows = [];
+    let row = [];
+    let curVal = '';
+    let inQuote = false;
+
+    // Remove BOM
     text = text.replace(/^\uFEFF/, '');
-    const lines = text.split(/\r?\n/);
-    lines.forEach(line => {
-        if (!line.trim()) return;
-        const row = line.split('\t').map(cell => {
-            let val = cell.trim();
-            if (val.startsWith('"') && val.endsWith('"')) {
-                val = val.slice(1, -1).replace(/""/g, '"');
+
+    for (let i = 0; i < text.length; i++) {
+        const c = text[i];
+        const next = text[i + 1];
+
+        if (inQuote) {
+            if (c === '"' && next === '"') {
+                curVal += '"'; // Escaped quote "" -> "
+                i++;
+            } else if (c === '"') {
+                inQuote = false;
+            } else {
+                curVal += c; // Literal character inside quotes (including \n and \t)
             }
-            return val;
-        });
+        } else {
+            if (c === '"') {
+                inQuote = true;
+            } else if (c === '\t') {
+                row.push(curVal.trim());
+                curVal = '';
+            } else if (c === '\r') {
+                continue; // Skip CR
+            } else if (c === '\n') {
+                row.push(curVal.trim());
+                if (row.length > 0) rows.push(row);
+                row = [];
+                curVal = '';
+            } else {
+                curVal += c;
+            }
+        }
+    }
+
+    // Last row/value
+    if (curVal !== '' || row.length > 0) {
+        row.push(curVal.trim());
         rows.push(row);
-    });
+    }
+
     return rows;
 }
 
 function processData(rows) {
     if (rows.length < 2) return [];
 
+    // headers will be from data/column_definition.json (via generate_tsv.py)
     const headers = rows[0];
     const data = rows.slice(1);
-
-    // Header check
-    console.log('Headers:', headers);
 
     const idx = {};
     headers.forEach((h, i) => idx[h] = i);
@@ -106,8 +140,9 @@ function processData(rows) {
     let currentDayObj = null;
 
     data.forEach(row => {
+        // Validation: Verify if the '日期' column exists and has content
         const date = get(row, '日期');
-        if (!date) return;
+        if (!date || date === '日期') return; // Skip empty or nested header rows
 
         if (date !== currentDate) {
             currentDate = date;
@@ -126,6 +161,7 @@ function processData(rows) {
             currentDayObj.periods.push(period);
         }
 
+        // Mapping fields according to column_definition.json structure
         period.timeline.push({
             time: get(row, '時間'),
             type: get(row, '類型'),
@@ -133,18 +169,22 @@ function processData(rows) {
             event: get(row, '活動標題'),
             description: get(row, '內容詳情'),
 
-            // New Columns Mapping
+            // Transportation
             transportType: get(row, '交通工具'),
             transportPayment: get(row, '交通支付方式'),
 
+            // Navigation & Links
             mapUrl: getMapUrl(get(row, '地點/導航')),
             link: get(row, '相關連結(時刻表)'),
+
+            // Station / Timing Info
             start: get(row, '起始站'),
             end: get(row, '終點站'),
             transportFreq: get(row, '班次頻率/時刻資訊'),
             duration: get(row, '移動時間'),
             cost: get(row, '交通費用(JPY)'),
 
+            // Attraction Info
             attractionWebsite: get(row, '景點官網'),
             attractionPrice: get(row, '景點票價 (JPY)'),
             attractionHours: get(row, '營業時間/狀態'),
@@ -157,9 +197,9 @@ function processData(rows) {
     return travelData;
 }
 
-// RESTORED: Wraps keyword into standard embed URL
 function getMapUrl(location) {
     if (!location || location.trim() === '-' || location.trim() === '') return null;
+    // Prepend the required embed prefix as per the app's iframe requirement
     return `https://maps.google.com/maps?q=${location.trim()}&output=embed`;
 }
 

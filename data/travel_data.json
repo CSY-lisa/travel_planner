@@ -63,58 +63,18 @@
             "link": "https://www.hij.airport.jp/en/access/timetable/2.html",
             "start": "廣島機場 (広島空港)",
             "end": "廣島站新幹線口 (広島駅新幹線口)",
-            "transportFreq": "\"15-20分一班。",
-            "duration": "",
-            "cost": "",
-            "attractionWebsite": "",
-            "attractionPrice": "",
-            "attractionHours": "",
-            "attractionIntro": "",
-            "attractionDuration": "",
-            "specialNotes": ""
+            "transportFreq": "15-20分一班。\r\n可搭班次：11:05, 11:25, 11:50",
+            "duration": "50分",
+            "cost": "¥1,500",
+            "attractionWebsite": "-",
+            "attractionPrice": "-",
+            "attractionHours": "-",
+            "attractionIntro": "-",
+            "attractionDuration": "-",
+            "specialNotes": "-"
           }
         ]
-      }
-    ]
-  },
-  {
-    "date": "可搭班次：11:05, 11:25, 11:50\"",
-    "dayOfWeek": "50分",
-    "periods": [
-      {
-        "period": "¥1,500",
-        "timeRange": "",
-        "timeline": [
-          {
-            "time": "-",
-            "type": "-",
-            "city": "-",
-            "event": "-",
-            "description": "-",
-            "transportType": "-",
-            "transportPayment": "",
-            "mapUrl": null,
-            "link": "",
-            "start": "",
-            "end": "",
-            "transportFreq": "",
-            "duration": "",
-            "cost": "",
-            "attractionWebsite": "",
-            "attractionPrice": "",
-            "attractionHours": "",
-            "attractionIntro": "",
-            "attractionDuration": "",
-            "specialNotes": ""
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "date": "2026/03/05",
-    "dayOfWeek": "Thu.",
-    "periods": [
+      },
       {
         "period": "下午",
         "timeRange": "",
