@@ -12,13 +12,17 @@ function parseCostJPY(str) {
   return match ? parseInt(match[0]) : 0;
 }
 
+function escHtml(s) {
+  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
 function extractCosts() {
   const transport = [];
   const attraction = [];
 
   travelData.forEach(day => {
-    day.periods.forEach(period => {
-      period.timeline.forEach(item => {
+    (day.periods || []).forEach(period => {
+      (period.timeline || []).forEach(item => {
         // Transport costs
         const tc = parseCostJPY(item.cost);
         if (tc > 0) {
@@ -533,12 +537,12 @@ function renderBudgetView(container) {
   const attractionTotal = attraction.reduce((sum, x) => sum + x.cost, 0);
   const grandTotal = transportTotal + attractionTotal;
 
-  const fmt = (n) => '¥' + n.toLocaleString();
+  const fmt = (n) => '¥' + n.toLocaleString('ja-JP');
 
   const renderRows = (items) => items.map(x => `
     <tr class="border-b border-gray-100 hover:bg-gray-50">
-      <td class="py-2 px-3 text-xs text-gray-500">${x.date.slice(5)}</td>
-      <td class="py-2 px-3 text-sm text-gray-700">${x.event}</td>
+      <td class="py-2 px-3 text-xs text-gray-500">${escHtml((x.date || '').slice(5))}</td>
+      <td class="py-2 px-3 text-sm text-gray-700">${escHtml(x.event)}</td>
       <td class="py-2 px-3 text-sm font-bold text-right text-gray-800">${fmt(x.cost)}</td>
     </tr>
   `).join('');
