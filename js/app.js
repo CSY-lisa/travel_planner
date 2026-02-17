@@ -5,6 +5,8 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 let travelData = [];
+let referenceData = [];
+let referenceActiveCategory = '全部';
 function parseCostJPY(str) {
   if (!str || str === '-' || str === '') return 0;
   // Extract first number sequence, ignore trailing text like "(單程)"
@@ -42,8 +44,23 @@ function extractCosts() {
 
 async function fetchData() {
     try {
-        const response = await fetch('data/travel_data.json');
-        travelData = await response.json();
+        const [travelRes, referenceRes] = await Promise.allSettled([
+            fetch('data/travel_data.json'),
+            fetch('data/reference_data.json')
+        ]);
+
+        if (travelRes.status === 'fulfilled' && travelRes.value.ok) {
+            travelData = await travelRes.value.json();
+        } else {
+            console.error('Failed to load travel data');
+        }
+
+        if (referenceRes.status === 'fulfilled' && referenceRes.value.ok) {
+            referenceData = await referenceRes.value.json();
+        } else {
+            console.warn('reference_data.json not found – reference page will be empty');
+        }
+
         initApp();
     } catch (error) {
         console.error('Error loading data:', error);
@@ -647,5 +664,76 @@ function renderBudgetView(container) {
 }
 
 function renderReferenceView(container) {
-  container.innerHTML = '<div class="p-8 text-center text-gray-400">補充資料 – 建置中</div>';
+    const categories = ['全部', ...new Set(referenceData.map(x => x.category).filter(Boolean))];
+
+    const filtered = referenceActiveCategory === '全部'
+        ? referenceData
+        : referenceData.filter(x => x.category === referenceActiveCategory);
+
+    const catTabs = categories.map(cat => `
+        <button onclick="setReferenceCategory('${escHtml(cat)}')"
+            class="flex-shrink-0 px-4 py-1.5 rounded-full text-sm font-bold transition-all ${cat === referenceActiveCategory
+            ? 'bg-teal-600 text-white shadow-md'
+            : 'bg-white text-gray-600 border border-gray-300'
+        }">
+            ${escHtml(cat)}
+        </button>
+    `).join('');
+
+    const cards = filtered.length === 0
+        ? '<div class="col-span-2 text-center text-gray-400 py-12">此分類尚無資料</div>'
+        : filtered.map((item, idx) => `
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 space-y-3 hover:shadow-md transition-shadow">
+                <!-- Category Badge + Name -->
+                <div class="flex items-start justify-between gap-2">
+                    <h3 class="font-bold text-gray-800 text-base leading-tight">${escHtml(item.name)}</h3>
+                    <span class="flex-shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                        item.category === '交通' ? 'bg-blue-100 text-blue-700' :
+                        item.category === '餐廳' ? 'bg-rose-100 text-rose-700' :
+                        'bg-gray-100 text-gray-600'
+                    }">${escHtml(item.category)}</span>
+                </div>
+
+                <!-- Description -->
+                <p class="text-sm text-gray-600 leading-relaxed">${escHtml(item.description)}</p>
+
+                <!-- Notes -->
+                ${item.notes ? `<p class="text-xs text-gray-400 bg-gray-50 rounded-lg p-2">${escHtml(item.notes)}</p>` : ''}
+
+                <!-- Links Row -->
+                <div class="flex gap-3 flex-wrap pt-1 border-t border-gray-50">
+                    ${item.website && /^https?:\/\//i.test(item.website) ? `<a href="${escHtml(item.website)}" target="_blank" rel="noopener noreferrer" class="text-xs font-bold text-blue-600 hover:underline">🌐 官網</a>` : ''}
+                    ${item.mapUrl ? `<button onclick="toggleMap('ref-map-${idx}')" class="text-xs font-bold text-emerald-600 hover:underline">📍 地圖 ▼</button>` : ''}
+                </div>
+
+                <!-- Map Embed (hidden by default) -->
+                ${item.mapUrl ? `
+                    <div id="ref-map-${idx}" class="hidden rounded-lg overflow-hidden border border-gray-200">
+                        <iframe class="w-full h-40 border-0" loading="lazy" src="${escHtml(item.mapUrl)}"></iframe>
+                    </div>
+                ` : ''}
+            </div>
+        `).join('');
+
+    container.innerHTML = `
+        <div class="animate-fade-in max-w-md md:max-w-2xl mx-auto px-4 pt-6 pb-12 space-y-5">
+            <h2 class="text-xl font-bold text-gray-800">📋 補充資料</h2>
+
+            <!-- Category Filter Tabs -->
+            <div class="flex gap-2 overflow-x-auto no-scrollbar pb-1">
+                ${catTabs}
+            </div>
+
+            <!-- Card Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                ${cards}
+            </div>
+        </div>
+    `;
 }
+
+window.setReferenceCategory = function(cat) {
+    referenceActiveCategory = cat;
+    const mainContent = document.getElementById('main-content');
+    renderReferenceView(mainContent);
+};

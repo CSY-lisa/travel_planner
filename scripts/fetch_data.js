@@ -18,6 +18,54 @@ if (fs.existsSync(dotenvPath)) {
 const SHEET_URL = process.env.SHEET_URL;
 const OUTPUT_PATH = path.join(__dirname, '../data/travel_data.json');
 const LOCAL_TSV_PATH = path.join(__dirname, '../data/itinerary_final.tsv');
+const REFERENCE_SHEET_URL = process.env.REFERENCE_SHEET_URL;
+const REFERENCE_OUTPUT_PATH = path.join(__dirname, '../data/reference_data.json');
+const LOCAL_REFERENCE_TSV_PATH = path.join(__dirname, '../data/reference_data_local.tsv');
+
+async function syncReferenceData() {
+    try {
+        let rawData = null;
+        if (fs.existsSync(LOCAL_REFERENCE_TSV_PATH)) {
+            console.log(`Reading reference from local TSV: ${LOCAL_REFERENCE_TSV_PATH}`);
+            rawData = fs.readFileSync(LOCAL_REFERENCE_TSV_PATH, 'utf8');
+        } else if (REFERENCE_SHEET_URL) {
+            console.log('Fetching reference data from Sheet...');
+            rawData = await getWithRedirect(REFERENCE_SHEET_URL);
+        } else {
+            console.warn('No reference data source found. Skipping.');
+            return;
+        }
+        const rows = parseTSV(rawData);
+        const jsonData = processReferenceData(rows);
+        fs.writeFileSync(REFERENCE_OUTPUT_PATH, JSON.stringify(jsonData, null, 2));
+        console.log(`REFERENCE: ${jsonData.length} items saved.`);
+    } catch (err) {
+        console.error('Reference sync failed:', err.message);
+    }
+}
+
+function processReferenceData(rows) {
+    if (rows.length < 2) return [];
+    const headers = rows[0];
+    const data = rows.slice(1);
+    const idx = {};
+    headers.forEach((h, i) => idx[h] = i);
+    const get = (row, col) => {
+        const val = row[idx[col]];
+        return (val === undefined || val === null) ? '' : val.trim();
+    };
+
+    return data
+        .filter(row => get(row, '名稱') !== '')
+        .map(row => ({
+            category: get(row, '類別'),
+            name: get(row, '名稱'),
+            website: get(row, '官網連結'),
+            mapUrl: getMapUrl(get(row, '地點/導航')),
+            description: get(row, '簡介'),
+            notes: get(row, '備註')
+        }));
+}
 
 async function runSync() {
     console.log('--- Travel Planner Sync (Robust TSV) ---');
@@ -38,6 +86,7 @@ async function runSync() {
     } catch (err) {
         console.error('Sync failed:', err.message);
     }
+    await syncReferenceData();
 }
 
 function getWithRedirect(url) {
