@@ -32,3 +32,5 @@ GEMINI.md
 /data/generate_tsv.py
 /data/itinerary_final.tsv
 /data/column_definition.json
+
+docs/plans

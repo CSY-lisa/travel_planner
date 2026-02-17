@@ -5,7 +5,21 @@
       "Bash(pandoc:*)",
       "Bash(where:*)",
       "Bash(pip install:*)",
-      "Bash(awk:*)"
+      "Bash(awk:*)",
+      "WebSearch",
+      "Bash(python3:*)",
+      "Bash(node -e:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git checkout:*)",
+      "Bash(/tmp/verify_costs.js:*)",
+      "Bash(node:*)",
+      "Bash(printf '\\\\nREFERENCE_SHEET_URL=https://docs.google.com/spreadsheets/d/YOUR_SHEET_ID/export?format=tsv&gid=YOUR_REFERENCE_TAB_GID\\\\n')",
+      "Bash(printf:*)",
+      "Bash(ls:*)",
+      "Bash(\"/tmp/code_review.md\":*)",
+      "Bash(\"/d/AI_project/travel_planner/TASK4_CODE_REVIEW.md\":*)",
+      "Bash(\"/d/AI_project/travel_planner/TASK4_SECURITY_CHECKLIST.md\":*)"
     ]
   }
 }
