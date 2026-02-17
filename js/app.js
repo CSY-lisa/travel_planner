@@ -261,6 +261,7 @@ function renderDailyView(container, dayIndex) {
                 // Content Blocks
                 const transportContent = `
                     <div class="space-y-2 text-xs text-gray-600">
+                        ${step.transportType && step.transportType !== '-' ? `<div class="flex gap-2"><span class="font-bold text-gray-500 min-w-[60px]">🚆 方式:</span> <span class="text-teal-700 font-bold">${step.transportType}</span></div>` : ''}
                         ${step.start && step.start !== '-' ? `<div class="flex gap-2"><span class="font-bold text-gray-500 min-w-[60px]">📍 起點:</span> <span>${step.start}</span></div>` : ''}
                         ${step.end && step.end !== '-' ? `<div class="flex gap-2"><span class="font-bold text-gray-500 min-w-[60px]">🏁 終點:</span> <span>${step.end}</span></div>` : ''}
                         ${step.duration && step.duration !== '-' ? `<div class="flex gap-2"><span class="font-bold text-gray-500 min-w-[60px]">⏱️ 移動:</span> <span>${step.duration}</span></div>` : ''}
@@ -320,7 +321,7 @@ function renderDailyView(container, dayIndex) {
                     if (hasTransportInfo) {
                         html += `
                             <button onclick="toggleMap('${cardIdBase}-transport')" class="flex items-center gap-1 text-xs font-bold text-gray-600 bg-gray-100 px-3 py-1.5 rounded-full hover:bg-gray-200 transition-colors">
-                                查看詳情 ▼
+                                交通資訊🚇 ▼
                             </button>
                         `;
                     }

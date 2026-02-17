@@ -28,5 +28,7 @@ build/
 Thumbs.db
 
 # travel
-/data/template_v2.csv
 GEMINI.md
+/data/generate_tsv.py
+/data/itinerary_final.tsv
+/data/column_definition.json

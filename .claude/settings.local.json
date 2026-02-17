@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python:*)",
+      "Bash(pandoc:*)",
+      "Bash(where:*)",
+      "Bash(pip install:*)",
+      "Bash(awk:*)"
+    ]
+  }
+}

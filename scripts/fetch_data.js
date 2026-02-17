@@ -17,27 +17,28 @@ if (fs.existsSync(dotenvPath)) {
 
 const SHEET_URL = process.env.SHEET_URL;
 const OUTPUT_PATH = path.join(__dirname, '../data/travel_data.json');
-const LOCAL_CSV_PATH = path.join(__dirname, '../data/template_v2.csv');
+const LOCAL_TSV_PATH = path.join(__dirname, '../data/itinerary_final.tsv');
 
 async function runSync() {
-    console.log('--- Travel Planner Sync ---');
-    if (!SHEET_URL) {
-        console.warn('SHEET_URL not set in .env. Skipping remote fetch.');
-        handleLocalFallback();
-        return;
-    }
+    console.log('--- Travel Planner Sync (TSV) ---');
 
+    // Priority: Try local file first as per current workflow
     try {
-        const rawData = await getWithRedirect(SHEET_URL);
-        if (rawData.length < 100) throw new Error('Received data too short (Potential Access Denied)');
-
-        handleData(rawData);
-        // Mirror to local CSV
-        fs.writeFileSync(LOCAL_CSV_PATH, rawData);
-        console.log(`SUCCESS: Remote sync complete.`);
+        if (fs.existsSync(LOCAL_TSV_PATH)) {
+            console.log(`Reading from local TSV: ${LOCAL_TSV_PATH}`);
+            const rawData = fs.readFileSync(LOCAL_TSV_PATH, 'utf8');
+            handleData(rawData);
+            console.log('SUCCESS: Local TSV processed.');
+        } else if (SHEET_URL) {
+            console.log('Local TSV not found. Fetching from Sheet...');
+            const rawData = await getWithRedirect(SHEET_URL);
+            handleData(rawData);
+            console.log('SUCCESS: Remote sync complete.');
+        } else {
+            console.warn('Neither local TSV nor SHEET_URL found.');
+        }
     } catch (err) {
-        console.error('Remote sync failed:', err.message);
-        handleLocalFallback();
+        console.error('Sync failed:', err.message);
     }
 }
 
@@ -61,103 +62,107 @@ function getWithRedirect(url) {
 }
 
 function handleData(rawData) {
-    const rows = parseCSV(rawData);
+    const rows = parseTSV(rawData);
     const jsonData = processData(rows);
     fs.writeFileSync(OUTPUT_PATH, JSON.stringify(jsonData, null, 2));
     console.log(`PROCESSED: ${jsonData.length} days.`);
 }
 
-function handleLocalFallback() {
-    console.log('Using local fallback...');
-    try {
-        if (!fs.existsSync(LOCAL_CSV_PATH)) throw new Error('Local file not found');
-        handleData(fs.readFileSync(LOCAL_CSV_PATH, 'utf8'));
-    } catch (e) {
-        console.error('FATAL: Data source unavailable.', e.message);
-    }
-}
-
-function parseCSV(text) {
+function parseTSV(text) {
     const rows = [];
-    let row = [];
-    let curVal = '';
-    let inQuote = false;
-    text = text.replace(/^\uFEFF/, '');
-    for (let i = 0; i < text.length; i++) {
-        const c = text[i];
-        const next = text[i + 1];
-        if (inQuote) {
-            if (c === '"' && next === '"') { curVal += '"'; i++; }
-            else if (c === '"') inQuote = false;
-            else curVal += c;
-        } else {
-            if (c === '"') inQuote = true;
-            else if (c === ',') { row.push(curVal.trim()); curVal = ''; }
-            else if (c === '\r') continue;
-            else if (c === '\n') {
-                row.push(curVal.trim());
-                if (row.length > 0) rows.push(row);
-                row = []; curVal = '';
-            } else curVal += c;
-        }
-    }
-    if (curVal || row.length > 0) { row.push(curVal.trim()); rows.push(row); }
+    text = text.replace(/^\uFEFF/, ''); // Remove BOM if present
+    const lines = text.split(/\r?\n/);
+
+    lines.forEach(line => {
+        if (!line.trim()) return;
+        // Simple TSV splitting. For complex quoted values containing tabs, a regex would be needed.
+        // Given our data structure, simple split should work for now.
+        const row = line.split('\t').map(cell => {
+            let val = cell.trim();
+            // Remove wrapping quotes if present
+            if (val.startsWith('"') && val.endsWith('"')) {
+                val = val.slice(1, -1).replace(/""/g, '"');
+            }
+            return val;
+        });
+        rows.push(row);
+    });
     return rows;
 }
 
 function processData(rows) {
     if (rows.length < 2) return [];
+
     const headers = rows[0];
     const data = rows.slice(1);
+
+    // Header check
+    console.log('Headers:', headers);
+
     const idx = {};
     headers.forEach((h, i) => idx[h] = i);
+
+    const get = (row, col) => {
+        const val = row[idx[col]];
+        return (val === undefined || val === null) ? '' : val;
+    };
+
     const travelData = [];
     let currentDate = null;
     let currentDayObj = null;
 
     data.forEach(row => {
-        const date = row[idx['日期']];
+        const date = get(row, '日期');
         if (!date) return;
+
         if (date !== currentDate) {
             currentDate = date;
-            currentDayObj = { date, dayOfWeek: row[idx['星期']] || '', periods: [] };
+            currentDayObj = {
+                date,
+                dayOfWeek: get(row, '星期') || '',
+                periods: []
+            };
             travelData.push(currentDayObj);
         }
-        const get = (col) => row[idx[col]] || '';
-        const periodName = get('時段') || '全日';
+
+        const periodName = get(row, '時段') || '全日';
         let period = currentDayObj.periods.find(p => p.period === periodName);
         if (!period) {
             period = { period: periodName, timeRange: '', timeline: [] };
             currentDayObj.periods.push(period);
         }
+
         period.timeline.push({
-            time: get('時間'),
-            type: get('類型'),
-            city: get('城市'),
-            event: get('活動標題'),
-            description: get('內容詳情'),
-            transportInfo: get('交通/票價資訊'),
-            cost: get('交通費用(JPY)') !== '-' ? get('交通費用(JPY)') : null,
-            link: get('相關連結(官網/時刻表)'),
-            mapUrl: getMapUrl(get('地點/導航')),
-            start: get('起始站'),
-            end: get('終點站'),
-            duration: get('移動時間'),
-            transportFreq: get('班次頻率/時刻資訊'),
-            attractionWebsite: get('景點官網'),
-            attractionPrice: get('景點票價 (JPY)'),
-            attractionHours: get('營業時間/狀態'),
-            attractionIntro: get('景點簡介'),
-            attractionDuration: get('景點建議停留時間'),
-            specialNotes: get('景點特殊狀況')
+            time: get(row, '時間'),
+            type: get(row, '類型'),
+            city: get(row, '城市'),
+            event: get(row, '活動標題'),
+            description: get(row, '內容詳情'),
+
+            // New Columns Mapping
+            transportType: get(row, '交通工具'),
+            transportPayment: get(row, '交通支付方式'),
+
+            // Map URL: Return raw value (it's now a full Embed URL)
+            mapUrl: get(row, '地點/導航'),
+
+            link: get(row, '相關連結(時刻表)'),
+            start: get(row, '起始站'),
+            end: get(row, '終點站'),
+            transportFreq: get(row, '班次頻率/時刻資訊'),
+            duration: get(row, '移動時間'),
+            cost: get(row, '交通費用(JPY)'),
+
+            attractionWebsite: get(row, '景點官網'),
+            attractionPrice: get(row, '景點票價 (JPY)'),
+            attractionHours: get(row, '營業時間/狀態'),
+            attractionIntro: get(row, '景點簡介'),
+            attractionDuration: get(row, '景點建議停留時間'),
+            specialNotes: get(row, '景點特殊狀況')
         });
     });
-    return travelData;
-}
 
-function getMapUrl(location) {
-    if (!location || location.trim() === '-' || location.trim() === '') return null;
-    return `https://maps.google.com/maps?q=${encodeURIComponent(location.trim())}&output=embed`;
+    return travelData;
 }
 
 runSync();
