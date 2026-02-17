@@ -261,12 +261,12 @@ function renderDailyView(container, dayIndex) {
                 // Content Blocks
                 const transportContent = `
                     <div class="space-y-2 text-xs text-gray-600">
-                        ${step.transportType && step.transportType !== '-' ? `<div class="flex gap-2"><span class="font-bold text-gray-500 min-w-[60px]">🚆 方式:</span> <span class="text-teal-700 font-bold">${step.transportType}</span></div>` : ''}
-                        ${step.start && step.start !== '-' ? `<div class="flex gap-2"><span class="font-bold text-gray-500 min-w-[60px]">📍 起點:</span> <span>${step.start}</span></div>` : ''}
-                        ${step.end && step.end !== '-' ? `<div class="flex gap-2"><span class="font-bold text-gray-500 min-w-[60px]">🏁 終點:</span> <span>${step.end}</span></div>` : ''}
-                        ${step.duration && step.duration !== '-' ? `<div class="flex gap-2"><span class="font-bold text-gray-500 min-w-[60px]">⏱️ 移動:</span> <span>${step.duration}</span></div>` : ''}
-                        ${step.cost && step.cost !== '-' && step.cost !== '¥0' ? `<div class="flex gap-2"><span class="font-bold text-gray-500 min-w-[60px]">💰 票價:</span> <span>${step.cost}</span></div>` : ''}
-                        ${step.transportFreq && step.transportFreq !== '-' ? `<div class="flex gap-2"><span class="font-bold text-gray-500 min-w-[60px]">🚌 班次:</span> <span>${step.transportFreq}</span></div>` : ''}
+                        ${step.transportType && step.transportType !== '-' ? `<div class="flex gap-2"><span class="font-bold text-gray-500 min-w-[60px]">🚆 交通工具:</span> <span class="text-teal-700 font-bold">${step.transportType}</span></div>` : ''}
+                        ${step.start && step.start !== '-' ? `<div class="flex gap-2"><span class="font-bold text-gray-500 min-w-[60px]">📍 起點站名:</span> <span>${step.start}</span></div>` : ''}
+                        ${step.end && step.end !== '-' ? `<div class="flex gap-2"><span class="font-bold text-gray-500 min-w-[60px]">🏁 終點站名:</span> <span>${step.end}</span></div>` : ''}
+                        ${step.duration && step.duration !== '-' ? `<div class="flex gap-2"><span class="font-bold text-gray-500 min-w-[60px]">⏱️ 移動時間:</span> <span>${step.duration}</span></div>` : ''}
+                        ${step.cost && step.cost !== '-' && step.cost !== '¥0' ? `<div class="flex gap-2"><span class="font-bold text-gray-500 min-w-[60px]">💰 交通票價:</span> <span>${step.cost}</span></div>` : ''}
+                        ${step.transportFreq && step.transportFreq !== '-' ? `<div class="flex gap-2"><span class="font-bold text-gray-500 min-w-[60px]">🚌 班次資訊:</span> <span>${step.transportFreq}</span></div>` : ''}
                         ${step.link && step.link !== '-' ? `<div class="flex gap-2 pt-1"><a href="${step.link}" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:text-blue-800 underline font-bold">🔗 交通官網/時刻表</a></div>` : ''}
                     </div>
                 `;
