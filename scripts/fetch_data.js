@@ -21,8 +21,6 @@ const LOCAL_TSV_PATH = path.join(__dirname, '../data/itinerary_final.tsv');
 
 async function runSync() {
     console.log('--- Travel Planner Sync (TSV) ---');
-
-    // Priority: Try local file first as per current workflow
     try {
         if (fs.existsSync(LOCAL_TSV_PATH)) {
             console.log(`Reading from local TSV: ${LOCAL_TSV_PATH}`);
@@ -70,16 +68,12 @@ function handleData(rawData) {
 
 function parseTSV(text) {
     const rows = [];
-    text = text.replace(/^\uFEFF/, ''); // Remove BOM if present
+    text = text.replace(/^\uFEFF/, '');
     const lines = text.split(/\r?\n/);
-
     lines.forEach(line => {
         if (!line.trim()) return;
-        // Simple TSV splitting. For complex quoted values containing tabs, a regex would be needed.
-        // Given our data structure, simple split should work for now.
         const row = line.split('\t').map(cell => {
             let val = cell.trim();
-            // Remove wrapping quotes if present
             if (val.startsWith('"') && val.endsWith('"')) {
                 val = val.slice(1, -1).replace(/""/g, '"');
             }
@@ -143,9 +137,7 @@ function processData(rows) {
             transportType: get(row, '交通工具'),
             transportPayment: get(row, '交通支付方式'),
 
-            // Map URL: Return raw value (it's now a full Embed URL)
-            mapUrl: get(row, '地點/導航'),
-
+            mapUrl: getMapUrl(get(row, '地點/導航')),
             link: get(row, '相關連結(時刻表)'),
             start: get(row, '起始站'),
             end: get(row, '終點站'),
@@ -163,6 +155,12 @@ function processData(rows) {
     });
 
     return travelData;
+}
+
+// RESTORED: Wraps keyword into standard embed URL
+function getMapUrl(location) {
+    if (!location || location.trim() === '-' || location.trim() === '') return null;
+    return `https://maps.google.com/maps?q=${location.trim()}&output=embed`;
 }
 
 runSync();
