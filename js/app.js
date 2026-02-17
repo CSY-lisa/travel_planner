@@ -322,8 +322,9 @@ function renderDailyView(container, dayIndex) {
 
                 // Content Blocks
                 // Build transport method blocks (primary + alternatives)
+                const primaryHasData = step.transportType || step.start || step.end || step.duration || step.cost;
                 const allTransportMethods = [
-                    {
+                    ...(primaryHasData ? [{
                         transportType: step.transportType,
                         start: step.start,
                         end: step.end,
@@ -331,7 +332,7 @@ function renderDailyView(container, dayIndex) {
                         cost: step.cost,
                         transportFreq: step.transportFreq,
                         link: step.link
-                    },
+                    }] : []),
                     ...(step.transportAlternatives || [])
                 ];
 
@@ -341,13 +342,13 @@ function renderDailyView(container, dayIndex) {
                     <div class="flex-1 min-w-[140px] bg-white border border-gray-200 rounded-lg p-3 shadow-sm">
                         ${hasMultipleMethods ? `<div class="text-[10px] font-bold text-indigo-500 mb-2 uppercase tracking-wide">方法 ${index + 1}</div>` : ''}
                         <div class="space-y-1.5 text-xs text-gray-600">
-                            ${m.transportType && m.transportType !== '-' ? `<div class="font-bold text-teal-700">${m.transportType}</div>` : ''}
-                            ${m.start && m.start !== '-' ? `<div>📍 ${m.start}</div>` : ''}
-                            ${m.end && m.end !== '-' ? `<div>🏁 ${m.end}</div>` : ''}
-                            ${m.duration && m.duration !== '-' ? `<div>⏱️ ${m.duration}</div>` : ''}
-                            ${m.cost && m.cost !== '-' && m.cost !== '¥0' ? `<div class="font-bold text-gray-800">💰 ${m.cost}</div>` : ''}
-                            ${m.transportFreq && m.transportFreq !== '-' ? `<div class="text-gray-400">🚌 ${m.transportFreq}</div>` : ''}
-                            ${m.link && m.link !== '-' ? `<div class="pt-1"><a href="${m.link}" target="_blank" rel="noopener noreferrer" class="text-blue-600 underline font-bold">🔗 時刻表</a></div>` : ''}
+                            ${m.transportType && m.transportType !== '-' ? `<div class="font-bold text-teal-700">${escHtml(m.transportType)}</div>` : ''}
+                            ${m.start && m.start !== '-' ? `<div>📍 ${escHtml(m.start)}</div>` : ''}
+                            ${m.end && m.end !== '-' ? `<div>🏁 ${escHtml(m.end)}</div>` : ''}
+                            ${m.duration && m.duration !== '-' ? `<div>⏱️ ${escHtml(m.duration)}</div>` : ''}
+                            ${m.cost && m.cost !== '-' && m.cost !== '¥0' ? `<div class="font-bold text-gray-800">💰 ${escHtml(m.cost)}</div>` : ''}
+                            ${m.transportFreq && m.transportFreq !== '-' ? `<div class="text-gray-400">🚌 ${escHtml(m.transportFreq)}</div>` : ''}
+                            ${m.link && m.link !== '-' && /^https?:\/\//i.test(m.link) ? `<div class="pt-1"><a href="${escHtml(m.link)}" target="_blank" rel="noopener noreferrer" class="text-blue-600 underline font-bold">🔗 時刻表</a></div>` : ''}
                         </div>
                     </div>
                 `;

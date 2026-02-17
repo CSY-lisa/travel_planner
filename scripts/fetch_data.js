@@ -173,6 +173,7 @@ function processData(rows) {
     const groupSeen = {}; // groupId -> index in mergedItems
 
     allItems.forEach(item => {
+        // item.groupId is '' (falsy) for rows without a group — they go to else branch
         if (item.groupId && groupSeen[item.groupId] !== undefined) {
             // Append as alternative transport to the existing item
             const existing = mergedItems[groupSeen[item.groupId]];
@@ -188,7 +189,7 @@ function processData(rows) {
                 link: item.link
             });
         } else {
-            if (item.groupId) groupSeen[item.groupId] = mergedItems.length;
+            if (item.groupId) groupSeen[item.groupId] = mergedItems.length; // index of item about to be pushed
             mergedItems.push(item);
         }
     });
