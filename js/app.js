@@ -5,6 +5,36 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 let travelData = [];
+function parseCostJPY(str) {
+  if (!str || str === '-' || str === '') return 0;
+  // Extract first number sequence, ignore trailing text like "(單程)"
+  const match = str.replace(/,/g, '').match(/\d+/);
+  return match ? parseInt(match[0]) : 0;
+}
+
+function extractCosts() {
+  const transport = [];
+  const attraction = [];
+
+  travelData.forEach(day => {
+    day.periods.forEach(period => {
+      period.timeline.forEach(item => {
+        // Transport costs
+        const tc = parseCostJPY(item.cost);
+        if (tc > 0) {
+          transport.push({ date: day.date, event: item.event, cost: tc });
+        }
+        // Attraction costs
+        const ac = parseCostJPY(item.attractionPrice);
+        if (ac > 0) {
+          attraction.push({ date: day.date, event: item.event, cost: ac });
+        }
+      });
+    });
+  });
+
+  return { transport, attraction };
+}
 
 async function fetchData() {
     try {
@@ -497,7 +527,93 @@ window.toggleMap = function (id) {
 };
 
 function renderBudgetView(container) {
-  container.innerHTML = '<div class="p-8 text-center text-gray-400">費用頁面 – 建置中</div>';
+  const { transport, attraction } = extractCosts();
+
+  const transportTotal = transport.reduce((sum, x) => sum + x.cost, 0);
+  const attractionTotal = attraction.reduce((sum, x) => sum + x.cost, 0);
+  const grandTotal = transportTotal + attractionTotal;
+
+  const fmt = (n) => '¥' + n.toLocaleString();
+
+  const renderRows = (items) => items.map(x => `
+    <tr class="border-b border-gray-100 hover:bg-gray-50">
+      <td class="py-2 px-3 text-xs text-gray-500">${x.date.slice(5)}</td>
+      <td class="py-2 px-3 text-sm text-gray-700">${x.event}</td>
+      <td class="py-2 px-3 text-sm font-bold text-right text-gray-800">${fmt(x.cost)}</td>
+    </tr>
+  `).join('');
+
+  container.innerHTML = `
+    <div class="animate-fade-in max-w-md md:max-w-2xl mx-auto px-4 pt-6 pb-12 space-y-6">
+      <h2 class="text-xl font-bold text-gray-800">💰 費用總覽</h2>
+
+      <!-- Summary Cards -->
+      <div class="grid grid-cols-3 gap-3">
+        <div class="bg-blue-50 border border-blue-100 rounded-xl p-4 text-center">
+          <div class="text-xs text-blue-500 font-bold mb-1">🚆 交通</div>
+          <div class="text-lg font-bold text-blue-700">${fmt(transportTotal)}</div>
+        </div>
+        <div class="bg-emerald-50 border border-emerald-100 rounded-xl p-4 text-center">
+          <div class="text-xs text-emerald-500 font-bold mb-1">🏯 景點</div>
+          <div class="text-lg font-bold text-emerald-700">${fmt(attractionTotal)}</div>
+        </div>
+        <div class="bg-teal-600 rounded-xl p-4 text-center shadow-md">
+          <div class="text-xs text-teal-100 font-bold mb-1">🎯 合計</div>
+          <div class="text-lg font-bold text-white">${fmt(grandTotal)}</div>
+        </div>
+      </div>
+
+      <!-- Transport Detail Table -->
+      <div>
+        <h3 class="text-sm font-bold text-gray-600 mb-2 flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-blue-400 inline-block"></span> 交通費用明細
+        </h3>
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+          <table class="w-full">
+            <thead class="bg-gray-50 border-b border-gray-100">
+              <tr>
+                <th class="py-2 px-3 text-left text-xs text-gray-400 font-bold">日期</th>
+                <th class="py-2 px-3 text-left text-xs text-gray-400 font-bold">項目</th>
+                <th class="py-2 px-3 text-right text-xs text-gray-400 font-bold">金額</th>
+              </tr>
+            </thead>
+            <tbody>${renderRows(transport)}</tbody>
+            <tfoot class="bg-blue-50 border-t border-blue-100">
+              <tr>
+                <td colspan="2" class="py-2 px-3 text-xs font-bold text-blue-700">小計</td>
+                <td class="py-2 px-3 text-sm font-bold text-right text-blue-700">${fmt(transportTotal)}</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+
+      <!-- Attraction Detail Table -->
+      <div>
+        <h3 class="text-sm font-bold text-gray-600 mb-2 flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 inline-block"></span> 景點費用明細
+        </h3>
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+          <table class="w-full">
+            <thead class="bg-gray-50 border-b border-gray-100">
+              <tr>
+                <th class="py-2 px-3 text-left text-xs text-gray-400 font-bold">日期</th>
+                <th class="py-2 px-3 text-left text-xs text-gray-400 font-bold">項目</th>
+                <th class="py-2 px-3 text-right text-xs text-gray-400 font-bold">金額</th>
+              </tr>
+            </thead>
+            <tbody>${renderRows(attraction)}</tbody>
+            <tfoot class="bg-emerald-50 border-t border-emerald-100">
+              <tr>
+                <td colspan="2" class="py-2 px-3 text-xs font-bold text-emerald-700">小計</td>
+                <td class="py-2 px-3 text-sm font-bold text-right text-emerald-700">${fmt(attractionTotal)}</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+    </div>
+  `;
 }
 
 function renderReferenceView(container) {
