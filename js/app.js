@@ -321,15 +321,40 @@ function renderDailyView(container, dayIndex) {
                 const cardIdBase = 'card-' + Math.random().toString(36).substr(2, 9);
 
                 // Content Blocks
+                // Build transport method blocks (primary + alternatives)
+                const allTransportMethods = [
+                    {
+                        transportType: step.transportType,
+                        start: step.start,
+                        end: step.end,
+                        duration: step.duration,
+                        cost: step.cost,
+                        transportFreq: step.transportFreq,
+                        link: step.link
+                    },
+                    ...(step.transportAlternatives || [])
+                ];
+
+                const hasMultipleMethods = allTransportMethods.length > 1;
+
+                const renderTransportMethod = (m, index) => `
+                    <div class="flex-1 min-w-[140px] bg-white border border-gray-200 rounded-lg p-3 shadow-sm">
+                        ${hasMultipleMethods ? `<div class="text-[10px] font-bold text-indigo-500 mb-2 uppercase tracking-wide">方法 ${index + 1}</div>` : ''}
+                        <div class="space-y-1.5 text-xs text-gray-600">
+                            ${m.transportType && m.transportType !== '-' ? `<div class="font-bold text-teal-700">${m.transportType}</div>` : ''}
+                            ${m.start && m.start !== '-' ? `<div>📍 ${m.start}</div>` : ''}
+                            ${m.end && m.end !== '-' ? `<div>🏁 ${m.end}</div>` : ''}
+                            ${m.duration && m.duration !== '-' ? `<div>⏱️ ${m.duration}</div>` : ''}
+                            ${m.cost && m.cost !== '-' && m.cost !== '¥0' ? `<div class="font-bold text-gray-800">💰 ${m.cost}</div>` : ''}
+                            ${m.transportFreq && m.transportFreq !== '-' ? `<div class="text-gray-400">🚌 ${m.transportFreq}</div>` : ''}
+                            ${m.link && m.link !== '-' ? `<div class="pt-1"><a href="${m.link}" target="_blank" rel="noopener noreferrer" class="text-blue-600 underline font-bold">🔗 時刻表</a></div>` : ''}
+                        </div>
+                    </div>
+                `;
+
                 const transportContent = `
-                    <div class="space-y-2 text-xs text-gray-600">
-                        ${step.transportType && step.transportType !== '-' ? `<div class="flex gap-2"><span class="font-bold text-gray-500 min-w-[60px]">🚆 交通工具:</span> <span class="text-teal-700 font-bold">${step.transportType}</span></div>` : ''}
-                        ${step.start && step.start !== '-' ? `<div class="flex gap-2"><span class="font-bold text-gray-500 min-w-[60px]">📍 起點站名:</span> <span>${step.start}</span></div>` : ''}
-                        ${step.end && step.end !== '-' ? `<div class="flex gap-2"><span class="font-bold text-gray-500 min-w-[60px]">🏁 終點站名:</span> <span>${step.end}</span></div>` : ''}
-                        ${step.duration && step.duration !== '-' ? `<div class="flex gap-2"><span class="font-bold text-gray-500 min-w-[60px]">⏱️ 移動時間:</span> <span>${step.duration}</span></div>` : ''}
-                        ${step.cost && step.cost !== '-' && step.cost !== '¥0' ? `<div class="flex gap-2"><span class="font-bold text-gray-500 min-w-[60px]">💰 交通票價:</span> <span>${step.cost}</span></div>` : ''}
-                        ${step.transportFreq && step.transportFreq !== '-' ? `<div class="flex gap-2"><span class="font-bold text-gray-500 min-w-[60px]">🚌 班次資訊:</span> <span>${step.transportFreq}</span></div>` : ''}
-                        ${step.link && step.link !== '-' ? `<div class="flex gap-2 pt-1"><a href="${step.link}" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:text-blue-800 underline font-bold">🔗 交通官網/時刻表</a></div>` : ''}
+                    <div class="${hasMultipleMethods ? 'flex gap-3 overflow-x-auto pb-1' : ''}">
+                        ${allTransportMethods.map((m, i) => renderTransportMethod(m, i)).join('')}
                     </div>
                 `;
 

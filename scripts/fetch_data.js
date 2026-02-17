@@ -123,7 +123,6 @@ function parseTSV(text) {
 function processData(rows) {
     if (rows.length < 2) return [];
 
-    // headers will be from data/column_definition.json (via generate_tsv.py)
     const headers = rows[0];
     const data = rows.slice(1);
 
@@ -135,56 +134,31 @@ function processData(rows) {
         return (val === undefined || val === null) ? '' : val;
     };
 
-    const travelData = [];
-    let currentDate = null;
-    let currentDayObj = null;
-
+    // First pass: collect all rows with metadata
+    const allItems = [];
     data.forEach(row => {
-        // Validation: Verify if the '日期' column exists and has content
         const date = get(row, '日期');
-        if (!date || date === '日期') return; // Skip empty or nested header rows
+        if (!date || date === '日期') return;
 
-        if (date !== currentDate) {
-            currentDate = date;
-            currentDayObj = {
-                date,
-                dayOfWeek: get(row, '星期') || '',
-                periods: []
-            };
-            travelData.push(currentDayObj);
-        }
-
-        const periodName = get(row, '時段') || '全日';
-        let period = currentDayObj.periods.find(p => p.period === periodName);
-        if (!period) {
-            period = { period: periodName, timeRange: '', timeline: [] };
-            currentDayObj.periods.push(period);
-        }
-
-        // Mapping fields according to column_definition.json structure
-        period.timeline.push({
+        allItems.push({
+            date,
+            dayOfWeek: get(row, '星期'),
+            period: get(row, '時段') || '全日',
+            groupId: get(row, '群組ID'),
             time: get(row, '時間'),
             type: get(row, '類型'),
             city: get(row, '城市'),
             event: get(row, '活動標題'),
             description: get(row, '內容詳情'),
-
-            // Transportation
             transportType: get(row, '交通工具'),
             transportPayment: get(row, '交通支付方式'),
-
-            // Navigation & Links
             mapUrl: getMapUrl(get(row, '地點/導航')),
             link: get(row, '相關連結(時刻表)'),
-
-            // Station / Timing Info
             start: get(row, '起始站'),
             end: get(row, '終點站'),
             transportFreq: get(row, '班次頻率/時刻資訊'),
             duration: get(row, '移動時間'),
             cost: get(row, '交通費用(JPY)'),
-
-            // Attraction Info
             attractionWebsite: get(row, '景點官網'),
             attractionPrice: get(row, '景點票價 (JPY)'),
             attractionHours: get(row, '營業時間/狀態'),
@@ -192,6 +166,57 @@ function processData(rows) {
             attractionDuration: get(row, '景點建議停留時間'),
             specialNotes: get(row, '景點特殊狀況')
         });
+    });
+
+    // Second pass: merge grouped rows (alternative transport methods)
+    const mergedItems = [];
+    const groupSeen = {}; // groupId -> index in mergedItems
+
+    allItems.forEach(item => {
+        if (item.groupId && groupSeen[item.groupId] !== undefined) {
+            // Append as alternative transport to the existing item
+            const existing = mergedItems[groupSeen[item.groupId]];
+            if (!existing.transportAlternatives) existing.transportAlternatives = [];
+            existing.transportAlternatives.push({
+                transportType: item.transportType,
+                transportPayment: item.transportPayment,
+                start: item.start,
+                end: item.end,
+                transportFreq: item.transportFreq,
+                duration: item.duration,
+                cost: item.cost,
+                link: item.link
+            });
+        } else {
+            if (item.groupId) groupSeen[item.groupId] = mergedItems.length;
+            mergedItems.push(item);
+        }
+    });
+
+    // Third pass: build day/period structure
+    const travelData = [];
+    let currentDate = null;
+    let currentDayObj = null;
+
+    mergedItems.forEach(item => {
+        if (item.date !== currentDate) {
+            currentDate = item.date;
+            currentDayObj = {
+                date: item.date,
+                dayOfWeek: item.dayOfWeek || '',
+                periods: []
+            };
+            travelData.push(currentDayObj);
+        }
+
+        let period = currentDayObj.periods.find(p => p.period === item.period);
+        if (!period) {
+            period = { period: item.period, timeRange: '', timeline: [] };
+            currentDayObj.periods.push(period);
+        }
+
+        const { date, dayOfWeek, period: _p, groupId, ...rest } = item;
+        period.timeline.push(rest);
     });
 
     return travelData;
