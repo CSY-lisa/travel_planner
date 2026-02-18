@@ -355,24 +355,40 @@ function renderDailyView(container, dayIndex) {
 
                 const hasMultipleMethods = allTransportMethods.length > 1;
 
+                // Sort by duration ascending (shortest = fastest = method 1)
+                const parseDurMin = (s) => {
+                    if (!s || s === '-') return Infinity;
+                    let m = 0;
+                    const h = s.match(/(\d+)\s*小時/); if (h) m += parseInt(h[1]) * 60;
+                    const min = s.match(/(\d+)\s*分/);  if (min) m += parseInt(min[1]);
+                    return m || Infinity;
+                };
+                const sortedMethods = hasMultipleMethods
+                    ? [...allTransportMethods].sort((a, b) => parseDurMin(a.duration) - parseDurMin(b.duration))
+                    : allTransportMethods;
+
                 const renderTransportMethod = (m, index) => `
-                    <div class="flex-1 min-w-[140px] bg-white border border-gray-200 rounded-lg p-3 shadow-sm">
-                        ${hasMultipleMethods ? `<div class="text-[10px] font-bold text-indigo-500 mb-2 uppercase tracking-wide">方法 ${index + 1}</div>` : ''}
-                        <div class="space-y-1.5 text-xs text-gray-600">
-                            ${m.transportType && m.transportType !== '-' ? `<div class="font-bold text-teal-700">${escHtml(m.transportType)}</div>` : ''}
-                            ${m.start && m.start !== '-' ? `<div>📍 ${escHtml(m.start)}</div>` : ''}
-                            ${m.end && m.end !== '-' ? `<div>🏁 ${escHtml(m.end)}</div>` : ''}
-                            ${m.duration && m.duration !== '-' ? `<div>⏱️ ${escHtml(m.duration)}</div>` : ''}
-                            ${m.cost && m.cost !== '-' && m.cost !== '¥0' ? `<div class="font-bold text-gray-800">💰 ${escHtml(m.cost)}</div>` : ''}
-                            ${m.transportFreq && m.transportFreq !== '-' ? `<div class="text-gray-400">🚌 ${escHtml(m.transportFreq)}</div>` : ''}
-                            ${m.link && m.link !== '-' && /^https?:\/\//i.test(m.link) ? `<div class="pt-1"><a href="${escHtml(m.link)}" target="_blank" rel="noopener noreferrer" class="text-blue-600 underline font-bold">🔗 時刻表</a></div>` : ''}
+                    <div class="bg-white border border-gray-200 rounded-lg p-3 shadow-sm">
+                        ${hasMultipleMethods ? `
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="text-[10px] font-bold text-indigo-500 uppercase tracking-wide">方法 ${index + 1}</span>
+                            ${index === 0 ? `<span class="text-[10px] font-bold text-amber-600 bg-amber-100 border border-amber-200 px-1.5 py-0.5 rounded-full">⚡ 最快</span>` : ''}
+                        </div>` : ''}
+                        ${m.transportType && m.transportType !== '-' ? `<div class="font-bold text-teal-700 text-xs mb-2">${escHtml(m.transportType)}</div>` : ''}
+                        <div class="space-y-1 text-xs text-gray-600">
+                            ${m.duration && m.duration !== '-' ? `<div class="flex gap-2"><span class="text-gray-400 w-14 flex-shrink-0">移動時間</span><span class="font-bold text-gray-700">⏱️ ${escHtml(m.duration)}</span></div>` : ''}
+                            ${m.start && m.start !== '-' ? `<div class="flex gap-2"><span class="text-gray-400 w-14 flex-shrink-0">起站</span><span>📍 ${escHtml(m.start)}</span></div>` : ''}
+                            ${m.end && m.end !== '-' ? `<div class="flex gap-2"><span class="text-gray-400 w-14 flex-shrink-0">迄站</span><span>🏁 ${escHtml(m.end)}</span></div>` : ''}
+                            ${m.transportFreq && m.transportFreq !== '-' ? `<div class="flex gap-2"><span class="text-gray-400 w-14 flex-shrink-0">班次</span><span>🚌 ${escHtml(m.transportFreq)}</span></div>` : ''}
+                            ${m.cost && m.cost !== '-' && m.cost !== '¥0' ? `<div class="flex gap-2"><span class="text-gray-400 w-14 flex-shrink-0">票價</span><span class="font-bold text-gray-800">💰 ${escHtml(m.cost)}</span></div>` : ''}
+                            ${m.link && m.link !== '-' && /^https?:\/\//i.test(m.link) ? `<div class="flex gap-2 pt-1"><span class="text-gray-400 w-14 flex-shrink-0">時刻表</span><a href="${escHtml(m.link)}" target="_blank" rel="noopener noreferrer" class="text-blue-600 underline font-bold">🔗 時刻表</a></div>` : ''}
                         </div>
                     </div>
                 `;
 
                 const transportContent = `
-                    <div class="${hasMultipleMethods ? 'flex gap-3 overflow-x-auto pb-1' : ''}">
-                        ${allTransportMethods.map((m, i) => renderTransportMethod(m, i)).join('')}
+                    <div class="space-y-3">
+                        ${sortedMethods.map((m, i) => renderTransportMethod(m, i)).join('')}
                     </div>
                 `;
 
