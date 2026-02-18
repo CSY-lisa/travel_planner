@@ -1,6 +1,7 @@
 
 # Dependencies
 node_modules/
+package-lock.json
 npm-debug.log
 yarn-error.log
 
@@ -29,8 +30,10 @@ Thumbs.db
 
 # travel
 GEMINI.md
+CLAUDE.md
 /data/generate_tsv.py
 /data/itinerary_final.tsv
 /data/column_definition.json
 
 docs/plans
+.claude/skills/continuous-learning/references/*

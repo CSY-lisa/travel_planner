@@ -1,38 +1,30 @@
 const https = require('https');
 const fs = require('fs');
 const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '../.env') });
 
-// 1. Improved ENV parsing
-const dotenvPath = path.join(__dirname, '../.env');
-if (fs.existsSync(dotenvPath)) {
-    const dotenvContent = fs.readFileSync(dotenvPath, 'utf8');
-    dotenvContent.split(/\r?\n/).forEach(line => {
-        const trimmed = line.trim();
-        if (!trimmed || trimmed.startsWith('#')) return;
-        const [key, ...valParts] = trimmed.split('=');
-        const value = valParts.join('=').trim();
-        if (key && value) process.env[key.trim()] = value;
-    });
+// Validate required env vars — fail fast if missing
+const REQUIRED_ENV = ['SHEET_URL'];
+const missing = REQUIRED_ENV.filter(k => !process.env[k]);
+if (missing.length > 0) {
+    console.error(`ERROR: Missing required environment variables: ${missing.join(', ')}`);
+    console.error('Please set them in your .env file.');
+    process.exit(1);
 }
 
 const SHEET_URL = process.env.SHEET_URL;
 const OUTPUT_PATH = path.join(__dirname, '../data/travel_data.json');
-const LOCAL_TSV_PATH = path.join(__dirname, '../data/itinerary_final.tsv');
 const REFERENCE_SHEET_URL = process.env.REFERENCE_SHEET_URL;
 const REFERENCE_OUTPUT_PATH = path.join(__dirname, '../data/reference_data.json');
-const LOCAL_REFERENCE_TSV_PATH = path.join(__dirname, '../data/reference_data_local.tsv');
 
 async function syncReferenceData() {
     try {
         let rawData = null;
-        if (fs.existsSync(LOCAL_REFERENCE_TSV_PATH)) {
-            console.log(`Reading reference from local TSV: ${LOCAL_REFERENCE_TSV_PATH}`);
-            rawData = fs.readFileSync(LOCAL_REFERENCE_TSV_PATH, 'utf8');
-        } else if (REFERENCE_SHEET_URL) {
+        if (REFERENCE_SHEET_URL) {
             console.log('Fetching reference data from Sheet...');
             rawData = await getWithRedirect(REFERENCE_SHEET_URL);
         } else {
-            console.warn('No reference data source found. Skipping.');
+            console.warn('No REFERENCE_SHEET_URL found. Skipping.');
             return;
         }
         const rows = parseTSV(rawData);
@@ -70,18 +62,13 @@ function processReferenceData(rows) {
 async function runSync() {
     console.log('--- Travel Planner Sync (Robust TSV) ---');
     try {
-        if (fs.existsSync(LOCAL_TSV_PATH)) {
-            console.log(`Reading from local TSV: ${LOCAL_TSV_PATH}`);
-            const rawData = fs.readFileSync(LOCAL_TSV_PATH, 'utf8');
-            handleData(rawData);
-            console.log('SUCCESS: Local TSV processed.');
-        } else if (SHEET_URL) {
-            console.log('Local TSV not found. Fetching from Sheet...');
+        if (SHEET_URL) {
+            console.log('Fetching from Sheet...');
             const rawData = await getWithRedirect(SHEET_URL);
             handleData(rawData);
             console.log('SUCCESS: Remote sync complete.');
         } else {
-            console.warn('Neither local TSV nor SHEET_URL found.');
+            console.warn('No SHEET_URL found.');
         }
     } catch (err) {
         console.error('Sync failed:', err.message);
