@@ -48,21 +48,25 @@ runSync()
 
 ## 環境設定
 
-**讀取 `.env` 檔案（第 6–16 行）**
+**讀取 `.env` 檔案（第 4 行）**
 
-不依賴第三方套件（如 dotenv），手動解析：
+使用標準套件 `dotenv`：
 
 ```javascript
-const dotenvPath = path.join(__dirname, '../.env');
-if (fs.existsSync(dotenvPath)) {
-    const dotenvContent = fs.readFileSync(dotenvPath, 'utf8');
-    dotenvContent.split(/\r?\n/).forEach(line => {
-        const trimmed = line.trim();
-        if (!trimmed || trimmed.startsWith('#')) return; // 略過空行與注釋
-        const [key, ...valParts] = trimmed.split('=');
-        const value = valParts.join('=').trim();         // 支援 value 含 = 符號
-        if (key && value) process.env[key.trim()] = value;
-    });
+require('dotenv').config({ path: path.join(__dirname, '../.env') });
+```
+
+**啟動驗證（第 6–13 行）**
+
+`SHEET_URL` 為必填，缺少時立即終止並顯示明確錯誤，不靜默失敗：
+
+```javascript
+const REQUIRED_ENV = ['SHEET_URL'];
+const missing = REQUIRED_ENV.filter(k => !process.env[k]);
+if (missing.length > 0) {
+    console.error(`ERROR: Missing required environment variables: ${missing.join(', ')}`);
+    console.error('Please set them in your .env file.');
+    process.exit(1);
 }
 ```
 
@@ -73,8 +77,15 @@ SHEET_URL=https://docs.google.com/spreadsheets/d/{ID}/export?format=tsv&gid={GID
 REFERENCE_SHEET_URL=https://docs.google.com/spreadsheets/d/{ID}/export?format=tsv&gid={GID}
 ```
 
+| 變數 | 必填 | 說明 |
+|------|------|------|
+| `SHEET_URL` | ✅ | 行程分頁 export URL，缺少會 `process.exit(1)` |
+| `REFERENCE_SHEET_URL` | 選填 | 補充資料分頁 export URL，缺少只跳過不報錯 |
+
 > **重要**：URL 必須使用 `/export?format=tsv` 格式，而非 `/edit` 頁面 URL。
 > `/edit` URL 回傳 HTML，無法解析；`/export?format=tsv` 直接回傳純文字 TSV。
+>
+> **安全**：真實 URL 只存在 `.env`（本地）或 GitHub Secrets（CI），不得出現在程式碼中。
 
 ---
 
