@@ -1,1 +1,18 @@
-[]
+[
+  {
+    "category": "交通",
+    "name": "廣電 (Hiroden)",
+    "website": "https://www.hiroden.co.jp/train/index.html",
+    "mapUrl": null,
+    "description": "廣島路面電車（廣電）是日本規模最大的路面電車系統，被譽為「移動的交通博物館」，車輛包含復古路面電車及現代化低底盤電車。其線路網遍布廣島市區，連接廣島站、原爆圓頂館及宮島口等各大景點，班次極為密集。票價採市內均一價或里程計費，並支援 ICOCA 等感應支付，是造訪廣島最道地且便利的代步選擇。",
+    "notes": ""
+  },
+  {
+    "category": "餐廳",
+    "name": "裕示堂",
+    "website": "",
+    "mapUrl": "https://maps.google.com/maps?q=https://maps.google.com/maps?q=11-8+Osugacho,+Minami+Ward,+Hiroshima&output=embed&output=embed",
+    "description": "這家店擁有工業風結合復古木質調的溫馨環境，被譽為大人的祕密基地。店內提供高品質手沖咖啡與各式威士忌、調酒，搭配自家製甜點與精緻下酒菜，深受當地人喜愛。消費價位在白天約 1,000 日圓以下，晚上酒吧時段約 2,000–3,000 日圓，Google 評分約 4.0 顆星以上，是行程中放鬆小酌的最佳選擇。",
+    "notes": ""
+  }
+]
