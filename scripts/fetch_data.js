@@ -51,6 +51,7 @@ function processReferenceData(rows) {
         .filter(row => get(row, '名稱') !== '')
         .map(row => ({
             category: get(row, '類別'),
+            city: get(row, '城市'),
             name: get(row, '名稱'),
             website: get(row, '官網連結'),
             mapUrl: getMapUrl(get(row, '地點/導航')),
@@ -261,8 +262,11 @@ function processData(rows) {
 
 function getMapUrl(location) {
     if (!location || location.trim() === '-' || location.trim() === '') return null;
-    // Prepend the required embed prefix as per the app's iframe requirement
-    return `https://maps.google.com/maps?q=${location.trim()}&output=embed`;
+    const loc = location.trim();
+    // If the cell already contains a full URL, use it directly
+    if (/^https?:\/\//i.test(loc)) return loc;
+    // Otherwise treat as a search query and build embed URL
+    return `https://www.google.com/maps?q=${encodeURIComponent(loc)}&output=embed`;
 }
 
 runSync();

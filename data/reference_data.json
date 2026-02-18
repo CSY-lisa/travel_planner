@@ -1,6 +1,7 @@
 [
   {
     "category": "交通",
+    "city": "廣島市",
     "name": "廣電 (Hiroden)",
     "website": "https://www.hiroden.co.jp/train/index.html",
     "mapUrl": null,
@@ -9,6 +10,7 @@
   },
   {
     "category": "餐廳",
+    "city": "廣島市",
     "name": "裕示堂",
     "website": "",
     "mapUrl": "https://maps.google.com/maps?q=https://maps.google.com/maps?q=11-8+Osugacho,+Minami+Ward,+Hiroshima&output=embed&output=embed",

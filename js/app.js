@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
 let travelData = [];
 let referenceData = [];
 let referenceActiveCategory = '全部';
+let referenceSearchQuery = '';
 function parseCostJPY(str) {
     if (!str || str === '-' || str === '') return 0;
     // Extract first number sequence, ignore trailing text like "(單程)"
@@ -16,6 +17,20 @@ function parseCostJPY(str) {
 
 function escHtml(s) {
     return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+// Fix double-wrapped map URLs stored in JSON (e.g. ?q=https://maps.google.com/...&output=embed&output=embed)
+// Strategy: remove the trailing &output=embed that getMapUrl() appended to an already-complete URL,
+// then check if the q= value is itself a URL — if so, return it (the real inner embed URL).
+function sanitizeMapUrl(url) {
+    if (!url) return null;
+    const qIdx = url.indexOf('?q=');
+    if (qIdx !== -1) {
+        const rawVal = url.slice(qIdx + 3).replace(/&output=embed$/, '');
+        const decoded = decodeURIComponent(rawVal);
+        if (/^https?:\/\//i.test(decoded)) return decoded;
+    }
+    return url;
 }
 
 function extractCosts() {
@@ -483,7 +498,7 @@ function renderDailyView(container, dayIndex) {
                 if (hasMap && !isTransport) { // Transport usually doesn't show map in this design unless requested, but let's stick to non-transport for map button as per request
                     html += `
                         <div id="${cardIdBase}-map" class="hidden mt-2 rounded-lg overflow-hidden shadow-inner bg-gray-100 w-full border border-gray-200">
-                             <iframe class="w-full h-48 border-0" loading="lazy" src="${step.mapUrl}"></iframe>
+                             <iframe class="w-full h-48 border-0" loading="lazy" src="${escHtml(sanitizeMapUrl(step.mapUrl))}"></iframe>
                         </div>
                      `;
                 }
@@ -679,12 +694,51 @@ function renderBudgetView(container) {
   `;
 }
 
+function getCategoryCardStyle(cat) {
+    // card / badge / cityBadge — all different color families for contrast
+    switch (cat) {
+        case '交通': return {
+            card:       'bg-sky-50 border-sky-100',
+            badge:      'bg-indigo-100 text-indigo-700',
+            cityBadge:  'bg-emerald-100 text-emerald-700 border-emerald-200'
+        };
+        case '餐廳': return {
+            card:       'bg-orange-50 border-orange-100',
+            badge:      'bg-violet-100 text-violet-700',
+            cityBadge:  'bg-sky-100 text-sky-700 border-sky-200'
+        };
+        case '景點': return {
+            card:       'bg-emerald-50 border-emerald-100',
+            badge:      'bg-indigo-100 text-indigo-700',
+            cityBadge:  'bg-amber-100 text-amber-700 border-amber-200'
+        };
+        case '住宿': return {
+            card:       'bg-violet-50 border-violet-100',
+            badge:      'bg-amber-100 text-amber-700',
+            cityBadge:  'bg-sky-100 text-sky-700 border-sky-200'
+        };
+        case '購物': return {
+            card:       'bg-amber-50 border-amber-100',
+            badge:      'bg-teal-100 text-teal-700',
+            cityBadge:  'bg-indigo-100 text-indigo-700 border-indigo-200'
+        };
+        default:     return {
+            card:       'bg-slate-50 border-slate-100',
+            badge:      'bg-teal-100 text-teal-700',
+            cityBadge:  'bg-sky-100 text-sky-700 border-sky-200'
+        };
+    }
+}
+
 function renderReferenceView(container) {
     const categories = ['全部', ...new Set(referenceData.map(x => x.category).filter(Boolean))];
 
-    const filtered = referenceActiveCategory === '全部'
-        ? referenceData
-        : referenceData.filter(x => x.category === referenceActiveCategory);
+    const q = referenceSearchQuery.toLowerCase().trim();
+    const filtered = referenceData.filter(x => {
+        const catMatch = referenceActiveCategory === '全部' || x.category === referenceActiveCategory;
+        const nameMatch = !q || (x.name || '').toLowerCase().includes(q);
+        return catMatch && nameMatch;
+    });
 
     const catTabs = categories.map(cat => `
         <button onclick="setReferenceCategory('${escHtml(cat)}')"
@@ -697,26 +751,28 @@ function renderReferenceView(container) {
     `).join('');
 
     const cards = filtered.length === 0
-        ? '<div class="col-span-2 text-center text-gray-400 py-12">此分類尚無資料</div>'
-        : filtered.map((item, idx) => `
-            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 space-y-3 hover:shadow-md transition-shadow">
-                <!-- Category Badge + Name -->
+        ? '<div class="col-span-2 text-center text-gray-400 py-12">找不到符合的資料 🔍</div>'
+        : filtered.map((item, idx) => {
+            const style = getCategoryCardStyle(item.category);
+            return `
+            <div class="${style.card} rounded-xl shadow-sm border p-4 space-y-3 hover:shadow-md transition-shadow">
+                <!-- Name Row: city icon + name + category badge -->
                 <div class="flex items-start justify-between gap-2">
-                    <h3 class="font-bold text-gray-800 text-base leading-tight">${escHtml(item.name)}</h3>
-                    <span class="flex-shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-full ${item.category === '交通' ? 'bg-blue-100 text-blue-700' :
-                item.category === '餐廳' ? 'bg-rose-100 text-rose-700' :
-                    'bg-gray-100 text-gray-600'
-            }">${escHtml(item.category)}</span>
+                    <div class="flex items-center gap-2 flex-wrap min-w-0">
+                        ${item.city && item.city !== '-' ? `<span class="flex-shrink-0 text-[10px] font-bold ${style.cityBadge} border px-1.5 py-0.5 rounded-full">📍 ${escHtml(item.city)}</span>` : ''}
+                        <h3 class="font-bold text-gray-800 text-base leading-tight">${escHtml(item.name)}</h3>
+                    </div>
+                    <span class="flex-shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-full ${style.badge}">${escHtml(item.category)}</span>
                 </div>
 
                 <!-- Description -->
                 <p class="text-sm text-gray-600 leading-relaxed">${escHtml(item.description)}</p>
 
                 <!-- Notes -->
-                ${item.notes ? `<p class="text-xs text-gray-400 bg-gray-50 rounded-lg p-2">${escHtml(item.notes)}</p>` : ''}
+                ${item.notes ? `<p class="text-xs text-gray-500 bg-white/70 rounded-lg p-2 border border-white">${escHtml(item.notes)}</p>` : ''}
 
                 <!-- Links Row -->
-                <div class="flex gap-3 flex-wrap pt-1 border-t border-gray-50">
+                <div class="flex gap-3 flex-wrap pt-1 border-t border-white/60">
                     ${item.website && /^https?:\/\//i.test(item.website) ? `<a href="${escHtml(item.website)}" target="_blank" rel="noopener noreferrer" class="text-xs font-bold text-blue-600 hover:underline">🌐 官網</a>` : ''}
                     ${item.mapUrl ? `<button onclick="toggleMap('ref-map-${idx}')" class="text-xs font-bold text-emerald-600 hover:underline">📍 地圖 ▼</button>` : ''}
                 </div>
@@ -724,19 +780,26 @@ function renderReferenceView(container) {
                 <!-- Map Embed (hidden by default) -->
                 ${item.mapUrl ? `
                     <div id="ref-map-${idx}" class="hidden rounded-lg overflow-hidden border border-gray-200">
-                        <iframe class="w-full h-40 border-0" loading="lazy" src="${escHtml(item.mapUrl)}"></iframe>
+                        <iframe class="w-full h-40 border-0" loading="lazy" src="${escHtml(sanitizeMapUrl(item.mapUrl))}"></iframe>
                     </div>
                 ` : ''}
             </div>
-        `).join('');
+        `}).join('');
 
     container.innerHTML = `
         <div class="animate-fade-in max-w-md md:max-w-2xl mx-auto px-4 pt-6 pb-12 space-y-5">
             <h2 class="text-xl font-bold text-gray-800">📋 補充資料</h2>
 
-            <!-- Category Filter Tabs -->
-            <div class="flex gap-2 overflow-x-auto no-scrollbar pb-1">
-                ${catTabs}
+            <!-- Search + Category Filters -->
+            <div class="space-y-2">
+                <input type="text"
+                    placeholder="搜尋名稱..."
+                    value="${escHtml(referenceSearchQuery)}"
+                    oninput="setReferenceSearch(this.value)"
+                    class="w-full border border-gray-200 rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-400 bg-white shadow-sm">
+                <div class="flex gap-2 overflow-x-auto no-scrollbar pb-1">
+                    ${catTabs}
+                </div>
             </div>
 
             <!-- Card Grid -->
@@ -749,6 +812,12 @@ function renderReferenceView(container) {
 
 window.setReferenceCategory = function (cat) {
     referenceActiveCategory = cat;
+    const mainContent = document.getElementById('main-content');
+    renderReferenceView(mainContent);
+};
+
+window.setReferenceSearch = function (val) {
+    referenceSearchQuery = val;
     const mainContent = document.getElementById('main-content');
     renderReferenceView(mainContent);
 };
