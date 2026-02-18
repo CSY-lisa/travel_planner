@@ -8,38 +8,38 @@ let travelData = [];
 let referenceData = [];
 let referenceActiveCategory = '全部';
 function parseCostJPY(str) {
-  if (!str || str === '-' || str === '') return 0;
-  // Extract first number sequence, ignore trailing text like "(單程)"
-  const match = str.replace(/,/g, '').match(/\d+/);
-  return match ? parseInt(match[0]) : 0;
+    if (!str || str === '-' || str === '') return 0;
+    // Extract first number sequence, ignore trailing text like "(單程)"
+    const match = str.replace(/,/g, '').match(/\d+/);
+    return match ? parseInt(match[0]) : 0;
 }
 
 function escHtml(s) {
-  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
 function extractCosts() {
-  const transport = [];
-  const attraction = [];
+    const transport = [];
+    const attraction = [];
 
-  travelData.forEach(day => {
-    (day.periods || []).forEach(period => {
-      (period.timeline || []).forEach(item => {
-        // Transport costs
-        const tc = parseCostJPY(item.cost);
-        if (tc > 0) {
-          transport.push({ date: day.date, event: item.event, cost: tc });
-        }
-        // Attraction costs
-        const ac = parseCostJPY(item.attractionPrice);
-        if (ac > 0) {
-          attraction.push({ date: day.date, event: item.event, cost: ac });
-        }
-      });
+    travelData.forEach(day => {
+        (day.periods || []).forEach(period => {
+            (period.timeline || []).forEach(item => {
+                // Transport costs
+                const tc = parseCostJPY(item.cost);
+                if (tc > 0) {
+                    transport.push({ date: day.date, event: item.event, cost: tc });
+                }
+                // Attraction costs
+                const ac = parseCostJPY(item.attractionPrice);
+                if (ac > 0) {
+                    attraction.push({ date: day.date, event: item.event, cost: ac });
+                }
+            });
+        });
     });
-  });
 
-  return { transport, attraction };
+    return { transport, attraction };
 }
 
 async function fetchData() {
@@ -75,35 +75,35 @@ function initApp() {
 }
 
 function handleRouting() {
-  const hash = window.location.hash;
-  const mainContent = document.getElementById('main-content');
-  const dayNav = document.getElementById('nav-container');
+    const hash = window.location.hash;
+    const mainContent = document.getElementById('main-content');
+    const dayNav = document.getElementById('nav-container');
 
-  // Day nav: only visible on itinerary tab
-  if (hash === '#reference' || hash === '#budget') {
-    dayNav.style.display = 'none';
-  } else {
-    dayNav.style.display = '';
-  }
-
-  if (!hash || hash === '#overview') {
-    renderOverview(mainContent);
-    updateNavState('overview');
-    updateTabState('itinerary');
-  } else if (hash.startsWith('#day')) {
-    const dayIndex = parseInt(hash.replace('#day', '')) - 1;
-    if (travelData[dayIndex]) {
-      renderDailyView(mainContent, dayIndex);
-      updateNavState(`day${dayIndex + 1}`);
-      updateTabState('itinerary');
+    // Day nav: only visible on itinerary tab
+    if (hash === '#reference' || hash === '#budget') {
+        dayNav.style.display = 'none';
+    } else {
+        dayNav.style.display = '';
     }
-  } else if (hash === '#reference') {
-    renderReferenceView(mainContent);
-    updateTabState('reference');
-  } else if (hash === '#budget') {
-    renderBudgetView(mainContent);
-    updateTabState('budget');
-  }
+
+    if (!hash || hash === '#overview') {
+        renderOverview(mainContent);
+        updateNavState('overview');
+        updateTabState('itinerary');
+    } else if (hash.startsWith('#day')) {
+        const dayIndex = parseInt(hash.replace('#day', '')) - 1;
+        if (travelData[dayIndex]) {
+            renderDailyView(mainContent, dayIndex);
+            updateNavState(`day${dayIndex + 1}`);
+            updateTabState('itinerary');
+        }
+    } else if (hash === '#reference') {
+        renderReferenceView(mainContent);
+        updateTabState('reference');
+    } else if (hash === '#budget') {
+        renderBudgetView(mainContent);
+        updateTabState('budget');
+    }
 }
 
 function updateNavState(activeId) {
@@ -121,15 +121,15 @@ function updateNavState(activeId) {
 }
 
 function updateTabState(activeTab) {
-  document.querySelectorAll('.tab-btn').forEach(btn => {
-    btn.classList.remove('text-teal-600', 'font-bold');
-    btn.classList.add('text-gray-400', 'font-medium');
-  });
-  const activeBtn = document.getElementById(`tab-${activeTab}`);
-  if (activeBtn) {
-    activeBtn.classList.remove('text-gray-400', 'font-medium');
-    activeBtn.classList.add('text-teal-600', 'font-bold');
-  }
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('text-teal-600', 'font-bold');
+        btn.classList.add('text-gray-400', 'font-medium');
+    });
+    const activeBtn = document.getElementById(`tab-${activeTab}`);
+    if (activeBtn) {
+        activeBtn.classList.remove('text-gray-400', 'font-medium');
+        activeBtn.classList.add('text-teal-600', 'font-bold');
+    }
 }
 
 // --- Renderers ---
@@ -360,7 +360,7 @@ function renderDailyView(container, dayIndex) {
                     if (!s || s === '-') return Infinity;
                     let m = 0;
                     const h = s.match(/(\d+)\s*小時/); if (h) m += parseInt(h[1]) * 60;
-                    const min = s.match(/(\d+)\s*分/);  if (min) m += parseInt(min[1]);
+                    const min = s.match(/(\d+)\s*分/); if (min) m += parseInt(min[1]);
                     return m || Infinity;
                 };
                 const sortedMethods = hasMultipleMethods
@@ -381,7 +381,7 @@ function renderDailyView(container, dayIndex) {
                             ${m.end && m.end !== '-' ? `<div class="flex gap-2"><span class="text-gray-400 w-14 flex-shrink-0">迄站</span><span>🏁 ${escHtml(m.end)}</span></div>` : ''}
                             ${m.transportFreq && m.transportFreq !== '-' ? `<div class="flex gap-2"><span class="text-gray-400 w-14 flex-shrink-0">班次</span><span>🚌 ${escHtml(m.transportFreq)}</span></div>` : ''}
                             ${m.cost && m.cost !== '-' && m.cost !== '¥0' ? `<div class="flex gap-2"><span class="text-gray-400 w-14 flex-shrink-0">票價</span><span class="font-bold text-gray-800">💰 ${escHtml(m.cost)}</span></div>` : ''}
-                            ${m.link && m.link !== '-' && /^https?:\/\//i.test(m.link) ? `<div class="flex gap-2 pt-1"><span class="text-gray-400 w-14 flex-shrink-0">時刻表</span><a href="${escHtml(m.link)}" target="_blank" rel="noopener noreferrer" class="text-blue-600 underline font-bold">🔗 時刻表</a></div>` : ''}
+                            ${m.link && m.link !== '-' && /^https?:\/\//i.test(m.link) ? `<div class="flex gap-2 pt-1"><span class="text-gray-400 w-14 flex-shrink-0">官網資訊</span><a href="${escHtml(m.link)}" target="_blank" rel="noopener noreferrer" class="text-blue-600 underline font-bold">🔗 官網資訊</a></div>` : ''}
                         </div>
                     </div>
                 `;
@@ -590,15 +590,15 @@ window.toggleMap = function (id) {
 };
 
 function renderBudgetView(container) {
-  const { transport, attraction } = extractCosts();
+    const { transport, attraction } = extractCosts();
 
-  const transportTotal = transport.reduce((sum, x) => sum + x.cost, 0);
-  const attractionTotal = attraction.reduce((sum, x) => sum + x.cost, 0);
-  const grandTotal = transportTotal + attractionTotal;
+    const transportTotal = transport.reduce((sum, x) => sum + x.cost, 0);
+    const attractionTotal = attraction.reduce((sum, x) => sum + x.cost, 0);
+    const grandTotal = transportTotal + attractionTotal;
 
-  const fmt = (n) => '¥' + n.toLocaleString('ja-JP');
+    const fmt = (n) => '¥' + n.toLocaleString('ja-JP');
 
-  const renderRows = (items) => items.map(x => `
+    const renderRows = (items) => items.map(x => `
     <tr class="border-b border-gray-100 hover:bg-gray-50">
       <td class="py-2 px-3 text-xs text-gray-500">${escHtml((x.date || '').slice(5))}</td>
       <td class="py-2 px-3 text-sm text-gray-700">${escHtml(x.event)}</td>
@@ -606,7 +606,7 @@ function renderBudgetView(container) {
     </tr>
   `).join('');
 
-  container.innerHTML = `
+    container.innerHTML = `
     <div class="animate-fade-in max-w-md md:max-w-2xl mx-auto px-4 pt-6 pb-12 space-y-6">
       <h2 class="text-xl font-bold text-gray-800">💰 費用總覽</h2>
 
@@ -703,11 +703,10 @@ function renderReferenceView(container) {
                 <!-- Category Badge + Name -->
                 <div class="flex items-start justify-between gap-2">
                     <h3 class="font-bold text-gray-800 text-base leading-tight">${escHtml(item.name)}</h3>
-                    <span class="flex-shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                        item.category === '交通' ? 'bg-blue-100 text-blue-700' :
-                        item.category === '餐廳' ? 'bg-rose-100 text-rose-700' :
-                        'bg-gray-100 text-gray-600'
-                    }">${escHtml(item.category)}</span>
+                    <span class="flex-shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-full ${item.category === '交通' ? 'bg-blue-100 text-blue-700' :
+                item.category === '餐廳' ? 'bg-rose-100 text-rose-700' :
+                    'bg-gray-100 text-gray-600'
+            }">${escHtml(item.category)}</span>
                 </div>
 
                 <!-- Description -->
@@ -748,7 +747,7 @@ function renderReferenceView(container) {
     `;
 }
 
-window.setReferenceCategory = function(cat) {
+window.setReferenceCategory = function (cat) {
     referenceActiveCategory = cat;
     const mainContent = document.getElementById('main-content');
     renderReferenceView(mainContent);
