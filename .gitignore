@@ -35,5 +35,8 @@ CLAUDE.md
 /data/itinerary_final.tsv
 /data/column_definition.json
 
+
 docs/plans
 .claude/skills/continuous-learning/references/*
+
+/temp/

@@ -19,7 +19,20 @@
       "Bash(ls:*)",
       "Bash(\"/tmp/code_review.md\":*)",
       "Bash(\"/d/AI_project/travel_planner/TASK4_CODE_REVIEW.md\":*)",
-      "Bash(\"/d/AI_project/travel_planner/TASK4_SECURITY_CHECKLIST.md\":*)"
+      "Bash(\"/d/AI_project/travel_planner/TASK4_SECURITY_CHECKLIST.md\":*)",
+      "WebFetch(domain:www.snowmonkeyresorts.com)",
+      "WebFetch(domain:shinkansen-ticket.com)",
+      "WebFetch(domain:hangouzousui-yama.shopinfo.jp)",
+      "WebFetch(domain:ekitan.com)",
+      "WebFetch(domain:transit.yahoo.co.jp)",
+      "WebFetch(domain:www.navitime.co.jp)",
+      "WebFetch(domain:jr-shinkansen.net)",
+      "WebFetch(domain:www.jrkbus.co.jp)",
+      "WebFetch(domain:dive-hiroshima.com)",
+      "WebFetch(domain:hrcjapan.com)",
+      "WebFetch(domain:gethiroshima.com)",
+      "WebFetch(domain:setouchifinder.com)",
+      "WebFetch(domain:joyinhiroshima.com)"
     ]
   }
 }
