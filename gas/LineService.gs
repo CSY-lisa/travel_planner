@@ -34,6 +34,23 @@ function sendLineReply(replyToken, message, props) {
   return true;
 }
 
+// LINE Chat Loading Indicator API
+// Shows a typing animation while the bot processes. Does NOT consume reply token.
+// loadingSeconds: 5–60 (rounded to multiples of 5)
+function sendLoadingIndicator(userId, props) {
+  if (!userId || userId === 'test_user_lisa') return; // skip in test mode
+  const token = props.getProperty('LINE_CHANNEL_ACCESS_TOKEN');
+  UrlFetchApp.fetch('https://api.line.me/v2/bot/chat/loading/start', {
+    method: 'post',
+    headers: {
+      'Authorization': 'Bearer ' + token,
+      'Content-Type': 'application/json'
+    },
+    payload: JSON.stringify({ chatId: userId, loadingSeconds: 20 }),
+    muteHttpExceptions: true
+  });
+}
+
 function buildConfirmationText(data) {
   const label = data.type === 'travel' ? '詳細行程' : '補充資料';
   const header = `📋 準備寫入：${label}\n──────────────────\n`;

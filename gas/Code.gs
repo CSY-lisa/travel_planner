@@ -159,6 +159,7 @@ function _handleMessage(userId, replyToken, text, props) {
   // ── 新請求 ──
   if (text.startsWith('行程 ')) {
     const input = text.slice(3).trim();
+    sendLoadingIndicator(userId, props);
     const fields = callGemini(input, 'travel', props);
     const data = { type: 'travel', fields };
     cache.put(pendingKey, JSON.stringify(data), 600);
@@ -168,6 +169,7 @@ function _handleMessage(userId, replyToken, text, props) {
 
   if (text.startsWith('補充 ')) {
     const input = text.slice(3).trim();
+    sendLoadingIndicator(userId, props);
     const fields = callGemini(input, 'reference', props);
     const data = { type: 'reference', fields };
     cache.put(pendingKey, JSON.stringify(data), 600);
