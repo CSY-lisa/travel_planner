@@ -87,6 +87,47 @@ function handleMessage(userId, replyToken, text, props) {
   }
 }
 
+// Parse natural language modification input.
+// Supported patterns:
+//   "改 欄位名 新內容"  (legacy format, preserved)
+//   "欄位名改新內容" / "欄位名改成新內容"
+//   "把欄位名改成新內容" / "把欄位名換成新內容"
+//   "欄位名換成新內容"
+//
+// Returns { rawField, value } where rawField may be approximate,
+// or null if no pattern matched.
+function parseModification(text) {
+  const patterns = [
+    /^改\s+(\S+)\s+(.+)$/,                       // 改 欄位名 新內容
+    /^把(.+?)(?:改成|換成|改為|換為)\s*(.+)$/,    // 把X改成Y
+    /^(.+?)(?:改成|換成|改為|換為)\s*(.+)$/,      // X改成Y
+    /^(.+?)改\s*(.+)$/,                           // X改Y
+    /^(.+?)換\s*(.+)$/,                           // X換Y
+  ];
+  for (const re of patterns) {
+    const m = text.match(re);
+    if (m) return { rawField: m[1].trim(), value: m[2].trim() };
+  }
+  return null;
+}
+
+// Resolve a user-supplied field name (possibly partial) to an exact key in fields.
+// Returns exact key string, or null if not found.
+// If multiple keys match the substring, returns the first match.
+function resolveField(rawField, fields) {
+  const keys = Object.keys(fields);
+  // 1. Exact match
+  if (rawField in fields) return rawField;
+  // 2. Substring match: key contains rawField
+  const sub = keys.filter(k => k.includes(rawField));
+  if (sub.length === 1) return sub[0];
+  if (sub.length > 1) return sub[0]; // pick first; caller may show all matches
+  // 3. rawField contains key (e.g. user typed full name with brackets)
+  const rev = keys.filter(k => rawField.includes(k));
+  if (rev.length >= 1) return rev[0];
+  return null;
+}
+
 function _handleMessage(userId, replyToken, text, props) {
   const cache = CacheService.getUserCache();
   const pendingKey = 'pending_' + userId;
@@ -130,24 +171,22 @@ function _handleMessage(userId, replyToken, text, props) {
       return;
     }
 
-    // ── 欄位修改（格式：改 欄位名 新內容）──
-    if (text.startsWith('改 ')) {
-      const spaceIdx = text.indexOf(' ', 2);
-      if (spaceIdx !== -1) {
-        const field = text.slice(2, spaceIdx).trim();
-        const value = text.slice(spaceIdx + 1).trim();
-        if (field in data.fields) {
-          data.fields[field] = value;
-          // 修改後重置 awaitingOverwrite，重新走確認流程
-          delete data.awaitingOverwrite;
-          delete data.rowIndex;
-          cache.put(pendingKey, JSON.stringify(data), 600);
-        } else {
-          sendLineReply(replyToken, `⚠️ 找不到欄位「${field}」，請確認欄位名稱正確。`, props);
-          return;
-        }
+    // ── 欄位修改（支援自然語言，如：城市改廣島市、把費用改成¥1200）──
+    const mod = parseModification(text);
+    if (mod) {
+      const exactField = resolveField(mod.rawField, data.fields);
+      if (exactField) {
+        data.fields[exactField] = mod.value;
+        delete data.awaitingOverwrite;
+        delete data.rowIndex;
+        cache.put(pendingKey, JSON.stringify(data), 600);
+        sendLineReply(replyToken, buildConfirmationText(data), props);
+      } else {
+        const fieldList = Object.keys(data.fields).join('、');
+        sendLineReply(replyToken,
+          `⚠️ 找不到欄位「${mod.rawField}」\n可用欄位：${fieldList}\n\n範例：城市改廣島市`,
+          props);
       }
-      sendLineReply(replyToken, buildConfirmationText(data), props);
       return;
     }
 
