@@ -1,11 +1,10 @@
+function doGet(e) {
+  return okResponse();
+}
+
 // ── LINE Webhook 簽章驗證 ─────────────────────────────
 // 官方文件：https://developers.line.biz/en/docs/messaging-api/verify-webhook-signature/
 // 演算法：Base64(HMAC-SHA256(rawBody, channelSecret))
-// GAS 的 Utilities.computeHmacSha256Signature 回傳 byte[]，需 base64Encode
-//
-// 注意：e.headers 在 GAS Web App 部署中可用（2024+ 版本）
-// 若 e.headers 取不到簽章，系統會記錄警告並允許通過（避免封鎖合法請求）
-// 確認部署正常後，可將 STRICT_SIGNATURE_MODE Script Property 設為 "true" 啟用嚴格模式
 function isValidLineSignature(rawBody, signature, props) {
   const channelSecret = props.getProperty('LINE_CHANNEL_SECRET');
 
@@ -19,7 +18,7 @@ function isValidLineSignature(rawBody, signature, props) {
     Logger.log(strictMode
       ? '⛔ 嚴格模式：缺少 x-line-signature，拒絕請求'
       : '⚠️ 缺少 x-line-signature（e.headers 可能不支援），允許通過');
-    return !strictMode; // strictMode=true 時拒絕；false 時允許（預設）
+    return !strictMode;
   }
 
   try {
@@ -42,10 +41,9 @@ function doPost(e) {
     const props = PropertiesService.getScriptProperties();
     const rawBody = e.postData.contents;
 
-    // 簽章驗證：防止任何知道 GAS URL 的人偽造 webhook 請求
     const signature = e.headers && (e.headers['x-line-signature'] || e.headers['X-Line-Signature']);
     if (!isValidLineSignature(rawBody, signature, props)) {
-      return okResponse(); // 靜默拒絕，不洩露任何資訊給攻擊者
+      return okResponse();
     }
 
     const body = JSON.parse(rawBody);
@@ -94,25 +92,55 @@ function _handleMessage(userId, replyToken, text, props) {
   const pendingKey = 'pending_' + userId;
   const pendingRaw = cache.get(pendingKey);
 
-  // ── 確認狀態 ──
+  // ── 等待中狀態（已填好欄位，等用戶確認）──
   if (pendingRaw) {
     const data = JSON.parse(pendingRaw);
 
-    if (text === '確認') {
-      writeToSheet(data, props); // 失敗時拋出 SHEETS_WRITE_FAILED
+    // ── 取消（任何等待狀態都可取消）──
+    if (text === '取消') {
       cache.remove(pendingKey);
-      sendLineReply(replyToken, buildSuccessText(data.type, props), props);
+      sendLineReply(replyToken, '✅ 已取消，資料未寫入。', props);
       return;
     }
 
+    // ── 確認 ──
+    if (text === '確認') {
+      if (data.awaitingOverwrite) {
+        // 第二次確認：用戶同意覆蓋既有列
+        overwriteRow(data, data.rowIndex, props);
+        cache.remove(pendingKey);
+        sendLineReply(replyToken, buildSuccessText(data.type, props) + '\n（已覆蓋原有資料）', props);
+      } else {
+        // 第一次確認：先檢查是否有重複
+        const result = checkAndWrite(data, props);
+        if (result.action === 'appended') {
+          cache.remove(pendingKey);
+          sendLineReply(replyToken, buildSuccessText(data.type, props), props);
+        } else {
+          // 發現重複 → 請用戶決定是否覆蓋
+          data.awaitingOverwrite = true;
+          data.rowIndex = result.rowIndex;
+          cache.put(pendingKey, JSON.stringify(data), 600);
+          sendLineReply(replyToken,
+            `⚠️ 已有相同記錄：${result.existingDesc}\n\n` +
+            `覆蓋原資料請回覆「確認」\n放棄請回覆「取消」`,
+            props);
+        }
+      }
+      return;
+    }
+
+    // ── 欄位修改（格式：改 欄位名 新內容）──
     if (text.startsWith('改 ')) {
-      // 格式：改 欄位名 新內容
-      const spaceIdx = text.indexOf(' ', 2); // 找「改 」後的第一個空格（欄位名與值的分隔）
+      const spaceIdx = text.indexOf(' ', 2);
       if (spaceIdx !== -1) {
         const field = text.slice(2, spaceIdx).trim();
         const value = text.slice(spaceIdx + 1).trim();
         if (field in data.fields) {
           data.fields[field] = value;
+          // 修改後重置 awaitingOverwrite，重新走確認流程
+          delete data.awaitingOverwrite;
+          delete data.rowIndex;
           cache.put(pendingKey, JSON.stringify(data), 600);
         } else {
           sendLineReply(replyToken, `⚠️ 找不到欄位「${field}」，請確認欄位名稱正確。`, props);
@@ -123,7 +151,7 @@ function _handleMessage(userId, replyToken, text, props) {
       return;
     }
 
-    // 不認識的回覆 → 重新顯示確認
+    // 不認識的回覆 → 重新顯示確認畫面
     sendLineReply(replyToken, buildConfirmationText(data), props);
     return;
   }
@@ -131,7 +159,7 @@ function _handleMessage(userId, replyToken, text, props) {
   // ── 新請求 ──
   if (text.startsWith('行程 ')) {
     const input = text.slice(3).trim();
-    const fields = callGemini(input, 'travel', props); // 失敗時拋出 RATE_LIMITED 等
+    const fields = callGemini(input, 'travel', props);
     const data = { type: 'travel', fields };
     cache.put(pendingKey, JSON.stringify(data), 600);
     sendLineReply(replyToken, buildConfirmationText(data), props);
@@ -149,19 +177,33 @@ function _handleMessage(userId, replyToken, text, props) {
 
   // 未知指令
   sendLineReply(replyToken,
-    '請用以下格式輸入：\n\n🗓 新增行程：\n行程 2026/03/07 下午 廣島 嚴島神社\n\n📝 新增補充資料：\n補充 裕示堂 廣島市威士忌酒吧',
+    '請用以下格式輸入：\n\n🗓 新增行程：\n行程 2026/03/07 下午 廣島 嚴島神社\n\n📝 新增補充資料：\n補充 裕示堂 廣島市威士忌酒吧\n\n💡 等待確認時可用「取消」取消操作',
     props);
 }
 
-// ── 模擬測試（不需真實 LINE 訊息）──────────────────────
-// 注意：mock_reply_token 會讓 LINE 回覆 400（正常），Gemini + cache 邏輯仍會執行
-function testDoPost() {
+// ── 模擬測試：直接在 GAS 控制台跑 ──────────────────────────
+// 測試新增行程
+function testNewTravel() {
   const props = PropertiesService.getScriptProperties();
-  _handleMessage(
-    'test_user_id',
-    'mock_reply_token',
-    '補充 裕示堂 廣島市威士忌酒吧',
+  Logger.log('🚀 開始測試：新增行程');
+  handleMessage(
+    'test_user_lisa', 
+    'mock_token', 
+    '行程 2026/03/07 下午 廣島 嚴島神社', 
     props
   );
-  Logger.log('testDoPost 完成，查看執行記錄');
+  Logger.log('🏁 測試請求已發送，請查看上方 Log 中的 🎬 [MOCK LINE REPLY]');
+}
+
+// 測試新增補充資料
+function testNewReference() {
+  const props = PropertiesService.getScriptProperties();
+  Logger.log('🚀 開始測試：新增補充資料');
+  handleMessage(
+    'test_user_lisa', 
+    'mock_token', 
+    '補充 裕示堂 廣島市威士忌酒吧', 
+    props
+  );
+  Logger.log('🏁 測試請求已發送，請查看下方 Log 中的 🎬 [MOCK LINE REPLY]');
 }

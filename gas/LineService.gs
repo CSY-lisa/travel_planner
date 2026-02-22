@@ -5,6 +5,12 @@ const LINE_MSG_LIMIT = 4500;
 // LINE reply token 有效期為 30 秒
 // 確保整個流程（LockService 等待 + Gemini 呼叫）不超過此時限
 function sendLineReply(replyToken, message, props) {
+  // ── 測試模式：若為 mock_token 則僅印出 Log 不發送 ──
+  if (replyToken === 'mock_token') {
+    Logger.log('🎬 [MOCK LINE REPLY]\n' + message);
+    return true;
+  }
+
   const token = props.getProperty('LINE_CHANNEL_ACCESS_TOKEN');
   const response = UrlFetchApp.fetch('https://api.line.me/v2/bot/message/reply', {
     method: 'post',
