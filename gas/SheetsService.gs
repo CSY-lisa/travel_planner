@@ -157,6 +157,11 @@ function getSheetByGid(ss, gid) {
   throw new Error('找不到分頁 GID: ' + gid);
 }
 
+// ── 刪除指定列 ────────────────────────────────────────
+function deleteRow(sheet, rowIndex) {
+  sheet.deleteRow(rowIndex);
+}
+
 // ── 測試：寫入一筆測試資料，確認動態欄位對應正確 ────────
 function testWriteReference() {
   const props = PropertiesService.getScriptProperties();

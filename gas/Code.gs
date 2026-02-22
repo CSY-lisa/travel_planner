@@ -132,6 +132,41 @@ function _handleMessage(userId, replyToken, text, props) {
   const cache = CacheService.getUserCache();
   const pendingKey = 'pending_' + userId;
   const pendingRaw = cache.get(pendingKey);
+  const pendingDelKey = 'pending_del_' + userId;
+  const pendingDelRaw = cache.get(pendingDelKey);
+
+  // ── 等待刪除確認 ──────────────────────────────────────
+  if (pendingDelRaw) {
+    const delData = JSON.parse(pendingDelRaw);
+    if (text === '取消') {
+      cache.remove(pendingDelKey);
+      sendLineReply(replyToken, '✅ 已取消，資料未刪除。', props);
+      return;
+    }
+    if (text === '確認') {
+      try {
+        const sheetId = props.getProperty('SHEET_ID');
+        const ss = SpreadsheetApp.openById(sheetId);
+        const gid = delData.type === 'travel'
+          ? props.getProperty('TRAVEL_SHEET_GID')
+          : props.getProperty('REFERENCE_SHEET_GID');
+        const sheet = getSheetByGid(ss, gid);
+        deleteRow(sheet, delData.rowIndex);
+        cache.remove(pendingDelKey);
+        sendLineReply(replyToken, `✅ 已刪除：${delData.desc}`, props);
+      } catch (err) {
+        Logger.log('deleteRow error: ' + err.message);
+        cache.remove(pendingDelKey);
+        sendLineReply(replyToken, '❌ 刪除失敗，請稍後再試。', props);
+      }
+      return;
+    }
+    // Unrecognized reply during delete confirmation → re-show prompt
+    sendLineReply(replyToken,
+      `⚠️ 確定要刪除「${delData.desc}」嗎？\n確認刪除 請回覆「確認」\n取消 請回覆「取消」`,
+      props);
+    return;
+  }
 
   // ── 等待中狀態（已填好欄位，等用戶確認）──
   if (pendingRaw) {
@@ -216,9 +251,65 @@ function _handleMessage(userId, replyToken, text, props) {
     return;
   }
 
+  // ── 刪除行程 ──────────────────────────────────────────
+  // Format: "刪除行程 MM/DD HH:mm" or "刪除行程 MM/DD 活動標題"
+  if (text.startsWith('刪除行程 ')) {
+    const parts = text.slice(5).trim().split(/\s+/);
+    if (parts.length < 2) {
+      sendLineReply(replyToken, '格式：刪除行程 03/07 14:00\n或：刪除行程 03/07 嚴島神社', props);
+      return;
+    }
+    const rawDate = parts[0];
+    const dateStr = rawDate.includes('/') && rawDate.split('/')[0].length <= 2
+      ? '2026/' + rawDate.padStart(5, '0')   // "3/07" → "2026/03/07"
+      : rawDate;
+    const second = parts.slice(1).join(' ');
+
+    const sheetId = props.getProperty('SHEET_ID');
+    const ss = SpreadsheetApp.openById(sheetId);
+    const sheet = getSheetByGid(ss, props.getProperty('TRAVEL_SHEET_GID'));
+
+    // Try lookup by date + time first, then date + title
+    const timePattern = /^\d{1,2}:\d{2}$/;
+    const lookupKey = timePattern.test(second)
+      ? { '日期': dateStr, '時間': second }
+      : { '日期': dateStr, '活動標題': second };
+
+    const found = findRowByKey(sheet, lookupKey);
+    if (!found) {
+      sendLineReply(replyToken, `查無「${rawDate} ${second}」，請確認日期與時間或標題。`, props);
+      return;
+    }
+    const desc = `${rawDate} ${second}（${found.existingValues['活動標題'] || second}）`;
+    cache.put(pendingDelKey, JSON.stringify({ type: 'travel', rowIndex: found.rowIndex, desc }), 600);
+    sendLineReply(replyToken,
+      `⚠️ 確定要刪除「${desc}」嗎？\n確認刪除 請回覆「確認」\n取消 請回覆「取消」`,
+      props);
+    return;
+  }
+
+  // ── 刪除補充 ──────────────────────────────────────────
+  // Format: "刪除補充 名稱"
+  if (text.startsWith('刪除補充 ')) {
+    const name = text.slice(5).trim();
+    const sheetId = props.getProperty('SHEET_ID');
+    const ss = SpreadsheetApp.openById(sheetId);
+    const sheet = getSheetByGid(ss, props.getProperty('REFERENCE_SHEET_GID'));
+    const found = findRowByKey(sheet, { '名稱': name });
+    if (!found) {
+      sendLineReply(replyToken, `查無補充資料「${name}」，請確認名稱。`, props);
+      return;
+    }
+    cache.put(pendingDelKey, JSON.stringify({ type: 'reference', rowIndex: found.rowIndex, desc: name }), 600);
+    sendLineReply(replyToken,
+      `⚠️ 確定要刪除補充資料「${name}」嗎？\n確認刪除 請回覆「確認」\n取消 請回覆「取消」`,
+      props);
+    return;
+  }
+
   // 未知指令
   sendLineReply(replyToken,
-    '請用以下格式輸入：\n\n🗓 新增行程：\n行程 2026/03/07 下午 廣島 嚴島神社\n\n📝 新增補充資料：\n補充 裕示堂 廣島市威士忌酒吧\n\n💡 等待確認時可用「取消」取消操作',
+    '請用以下格式輸入：\n\n🗓 新增行程：\n行程 2026/03/07 下午 廣島 嚴島神社\n\n📝 新增補充資料：\n補充 裕示堂 廣島市威士忌酒吧\n\n🗑 刪除行程：\n刪除行程 03/07 14:00\n刪除補充 裕示堂\n\n💡 等待確認時可用「取消」取消操作',
     props);
 }
 
@@ -234,6 +325,19 @@ function testNewTravel() {
     props
   );
   Logger.log('🏁 測試請求已發送，請查看上方 Log 中的 🎬 [MOCK LINE REPLY]');
+}
+
+function testDeleteReference() {
+  const props = PropertiesService.getScriptProperties();
+  Logger.log('🚀 測試：刪除補充（查無）');
+  handleMessage('test_user_lisa', 'mock_token', '刪除補充 不存在的地方', props);
+}
+
+function testDeleteFlow() {
+  // Step 1: trigger delete (will find or not find)
+  const props = PropertiesService.getScriptProperties();
+  Logger.log('🚀 測試：刪除行程指令解析');
+  handleMessage('test_user_lisa', 'mock_token', '刪除行程 03/07 14:00', props);
 }
 
 // 測試新增補充資料
