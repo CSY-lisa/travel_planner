@@ -89,9 +89,9 @@ function getWithRedirect(url) {
                 reject(new Error(`HTTP Status ${res.statusCode}`));
                 return;
             }
-            let body = '';
-            res.on('data', chunk => body += chunk);
-            res.on('end', () => resolve(body));
+            const chunks = [];
+            res.on('data', chunk => chunks.push(chunk));
+            res.on('end', () => resolve(Buffer.concat(chunks).toString('utf8')));
         }).on('error', reject);
     });
 }

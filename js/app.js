@@ -8,6 +8,7 @@ let travelData = [];
 let referenceData = [];
 let referenceActiveCategory = '全部';
 let referenceSearchQuery = '';
+let referenceCityFilter = '全部';
 function parseCostJPY(str) {
     if (!str || str === '-' || str === '') return 0;
     // Extract first number sequence, ignore trailing text like "(單程)"
@@ -83,7 +84,17 @@ async function fetchData() {
     }
 }
 
+function updateNavDayLabels() {
+    travelData.forEach((day, i) => {
+        const btn = document.querySelector(`[data-target="day${i + 1}"]`);
+        if (!btn) return;
+        const [, m, d] = day.date.split('/');
+        btn.textContent = `${parseInt(m)}/${parseInt(d)}(${day.dayOfWeek})`;
+    });
+}
+
 function initApp() {
+    updateNavDayLabels();
     // Determine view based on URL hash or default
     handleRouting();
     window.addEventListener('hashchange', handleRouting);
@@ -736,8 +747,9 @@ function renderReferenceView(container) {
     const q = referenceSearchQuery.toLowerCase().trim();
     const filtered = referenceData.filter(x => {
         const catMatch = referenceActiveCategory === '全部' || x.category === referenceActiveCategory;
+        const cityMatch = referenceCityFilter === '全部' || x.city === referenceCityFilter;
         const nameMatch = !q || (x.name || '').toLowerCase().includes(q);
-        return catMatch && nameMatch;
+        return catMatch && cityMatch && nameMatch;
     });
 
     const catTabs = categories.map(cat => `
@@ -749,6 +761,18 @@ function renderReferenceView(container) {
             ${escHtml(cat)}
         </button>
     `).join('');
+
+    // City filter — only render if there are 2+ unique cities
+    const allCities = [...new Set(referenceData.map(x => x.city).filter(Boolean))];
+    const cityTabs = allCities.length >= 2 ? ['全部', ...allCities].map(city => `
+        <button onclick="setReferenceCity('${escHtml(city)}')"
+            class="flex-shrink-0 px-3 py-1 rounded-full text-xs font-bold transition-all ${city === referenceCityFilter
+            ? 'bg-indigo-600 text-white shadow-md'
+            : 'bg-white text-gray-500 border border-gray-300'
+        }">
+            📍 ${escHtml(city)}
+        </button>
+    `).join('') : '';
 
     const cards = filtered.length === 0
         ? '<div class="col-span-2 text-center text-gray-400 py-12">找不到符合的資料 🔍</div>'
@@ -793,6 +817,7 @@ function renderReferenceView(container) {
             <!-- Search + Category Filters -->
             <div class="space-y-2">
                 <input type="text"
+                    id="ref-search-input"
                     placeholder="搜尋名稱..."
                     value="${escHtml(referenceSearchQuery)}"
                     oninput="setReferenceSearch(this.value)"
@@ -800,6 +825,7 @@ function renderReferenceView(container) {
                 <div class="flex gap-2 overflow-x-auto no-scrollbar pb-1">
                     ${catTabs}
                 </div>
+                ${cityTabs ? `<div class="flex gap-2 overflow-x-auto no-scrollbar pb-1">${cityTabs}</div>` : ''}
             </div>
 
             <!-- Card Grid -->
@@ -818,6 +844,18 @@ window.setReferenceCategory = function (cat) {
 
 window.setReferenceSearch = function (val) {
     referenceSearchQuery = val;
+    const mainContent = document.getElementById('main-content');
+    renderReferenceView(mainContent);
+    // Restore focus and cursor after full re-render
+    const inp = document.getElementById('ref-search-input');
+    if (inp) {
+        inp.focus();
+        inp.setSelectionRange(inp.value.length, inp.value.length);
+    }
+};
+
+window.setReferenceCity = function (city) {
+    referenceCityFilter = city;
     const mainContent = document.getElementById('main-content');
     renderReferenceView(mainContent);
 };
