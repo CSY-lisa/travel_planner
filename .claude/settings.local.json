@@ -32,7 +32,10 @@
       "WebFetch(domain:hrcjapan.com)",
       "WebFetch(domain:gethiroshima.com)",
       "WebFetch(domain:setouchifinder.com)",
-      "WebFetch(domain:joyinhiroshima.com)"
+      "WebFetch(domain:joyinhiroshima.com)",
+      "WebFetch(domain:developers.google.com)",
+      "WebFetch(domain:developers.line.biz)",
+      "WebFetch(domain:ai.google.dev)"
     ]
   }
 }

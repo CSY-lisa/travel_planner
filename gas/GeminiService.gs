@@ -1,35 +1,64 @@
 // Gemini 3 Flash Preview — 直連，不使用 Google Search（2026/1 起需付費）
 const GEMINI_MODEL = 'gemini-3-flash-preview'; // 備用：'gemini-2.5-flash'
 const GEMINI_BASE_URL = 'https://generativelanguage.googleapis.com/v1beta/models/';
+
+// ── 限速設定 ──────────────────────────────────────────
+// 官方 gemini-2.5-flash 免費配額：10 RPM / 250 RPD
+// gemini-3-flash-preview 無官方公開數字，保守設定如下
+// RPM=5 = 每分鐘最多 5 次（實際上限 10）→ 安全緩衝 50%
+// RPD=20 = 每日最多 20 次（實際上限 250+）→ 個人用量夠，避免意外耗盡
 const RPM_LIMIT = 5;
 const RPD_LIMIT = 20;
 
 // ── 限速保護 ──────────────────────────────────────────
+// 使用 LockService 防止並發請求的 read-modify-write race condition
+// GAS 最多 30 個並發執行；此 Bot 為單人使用，通常不超過 2 個並發
+//
+// 為何 sleep 在 lock 內：確保請求之間有間隔，防止瞬間 burst
+// 這意味著每個 lock 佔用 ~3 秒；timeout 設 30s 可容納 ~8 個排隊請求
+// 超過 30s 仍等不到 lock → 拋出 RATE_LIMITED（告知用戶稍後再試）
 function checkAndThrottle(props) {
-  const cache = CacheService.getScriptCache();
-  const today = Utilities.formatDate(new Date(), 'Asia/Taipei', 'yyyy-MM-dd');
-
-  // RPD 每日上限
-  const rpdKey = 'gem_rpd_' + today;
-  const rpdCount = parseInt(props.getProperty(rpdKey) || '0');
-  if (rpdCount >= RPD_LIMIT) {
-    throw new Error(`⚠️ 今日已達上限（${RPD_LIMIT} 次），請明天再使用。`);
+  const lock = LockService.getScriptLock();
+  try {
+    lock.waitLock(30000); // 30s = 容納 ~8 個排隊請求（每個持鎖 ~3s）
+  } catch (e) {
+    Logger.log('LockService 等待超時 (30s)：系統過於繁忙');
+    throw new Error('RATE_LIMITED');
   }
 
-  // RPM：達上限時 sleep 60 秒等重置
-  const rpmKey = 'gem_rpm';
-  const rpmCount = parseInt(cache.get(rpmKey) || '0');
-  if (rpmCount >= RPM_LIMIT) {
-    Logger.log('RPM 上限，等待 60 秒...');
-    Utilities.sleep(60000);
-    cache.remove(rpmKey);
-  } else {
-    Utilities.sleep(3000); // 每次間隔 3 秒，安全邊際
-  }
+  try {
+    const cache = CacheService.getScriptCache();
+    const today = Utilities.formatDate(new Date(), 'Asia/Taipei', 'yyyy-MM-dd');
 
-  cache.put(rpmKey, String(rpmCount + 1), 60);
-  props.setProperty(rpdKey, String(rpdCount + 1));
-  Logger.log(`用量 — 今日: ${rpdCount + 1}/${RPD_LIMIT}，本分鐘: ${rpmCount + 1}/${RPM_LIMIT}`);
+    // ── RPD 每日上限 ──
+    const rpdKey = 'gem_rpd_' + today;
+    const rpdCount = parseInt(props.getProperty(rpdKey) || '0');
+    if (rpdCount >= RPD_LIMIT) {
+      throw new Error('DAILY_LIMIT');
+    }
+
+    // ── RPM：每分鐘上限，達到時直接告知用戶（不 sleep 60s，避免 LINE token 過期）──
+    // LINE reply token 有效期 30s；60s sleep 會導致 token 過期，用戶無回應
+    const rpmKey = 'gem_rpm';
+    const rpmCount = parseInt(cache.get(rpmKey) || '0');
+    if (rpmCount >= RPM_LIMIT) {
+      throw new Error('RATE_LIMITED');
+    }
+
+    // ── 請求間隔 3s（非第一次請求才 sleep）──
+    // 目的：避免瞬間 burst 傷害 API；3s × 5 RPM = 最多每 3s 一次
+    if (rpmCount > 0) {
+      Utilities.sleep(3000);
+    }
+
+    // ── 原子計數更新（在 lock 保護內）──
+    cache.put(rpmKey, String(rpmCount + 1), 60); // 60s TTL = 1 分鐘後重置
+    props.setProperty(rpdKey, String(rpdCount + 1));
+    Logger.log(`Gemini 用量 — 今日: ${rpdCount + 1}/${RPD_LIMIT}，本分鐘: ${rpmCount + 1}/${RPM_LIMIT}`);
+
+  } finally {
+    lock.releaseLock(); // 無論成功或例外都釋放 lock
+  }
 }
 
 // ── System Prompts ────────────────────────────────────
@@ -77,7 +106,7 @@ const REFERENCE_SYSTEM_PROMPT = `你是廣島旅行資料助理。使用者會�
 
 // ── 主要呼叫函式 ──────────────────────────────────────
 function callGemini(userInput, mode, props) {
-  checkAndThrottle(props);
+  checkAndThrottle(props); // 含 LockService 保護 + 計數器更新
 
   const apiKey = props.getProperty('GEMINI_API_KEY');
   const systemPrompt = mode === 'travel' ? TRAVEL_SYSTEM_PROMPT : REFERENCE_SYSTEM_PROMPT;
@@ -93,12 +122,24 @@ function callGemini(userInput, mode, props) {
   const response = UrlFetchApp.fetch(url, {
     method: 'post',
     contentType: 'application/json',
-      payload: JSON.stringify(payload),
+    payload: JSON.stringify(payload),
     muteHttpExceptions: true
   });
 
+  const httpCode = response.getResponseCode();
+
+  // HTTP 429 = API 端的速率限制（補充防線，通常不會到這裡因 checkAndThrottle 先攔截）
+  if (httpCode === 429) {
+    Logger.log('Gemini 429: API 端速率限制');
+    throw new Error('RATE_LIMITED');
+  }
+
   const result = JSON.parse(response.getContentText());
-  if (result.error) throw new Error('Gemini error: ' + result.error.message);
+  if (result.error) {
+    Logger.log('Gemini API error: ' + result.error.message);
+    throw new Error('Gemini error: ' + result.error.message);
+  }
+
   return JSON.parse(result.candidates[0].content.parts[0].text);
 }
 
