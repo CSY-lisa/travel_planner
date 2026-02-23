@@ -154,7 +154,7 @@ function handleRouting() {
     const dayNav = document.getElementById('nav-container');
 
     // Day nav: only visible on itinerary tab
-    if (hash === '#reference' || hash === '#budget') {
+    if (hash === '#reference' || hash === '#budget' || hash === '#rate') {
         dayNav.style.display = 'none';
     } else {
         dayNav.style.display = '';
@@ -177,6 +177,9 @@ function handleRouting() {
     } else if (hash === '#budget') {
         renderBudgetView(mainContent);
         updateTabState('budget');
+    } else if (hash === '#rate') {
+        renderRateView(mainContent);
+        updateTabState('rate');
     }
 }
 
@@ -775,6 +778,93 @@ function renderBudgetView(container) {
       </div>
     </div>
   `;
+}
+
+function renderRateView(container) {
+    const history = exchangeRateHistory.slice(-7); // last 7 entries
+    const currentRate = jpyToTwd;
+    const rates = history.map(h => h.rate);
+    const maxRate = rates.length ? Math.max(...rates).toFixed(4) : '-';
+    const minRate = rates.length ? Math.min(...rates).toFixed(4) : '-';
+    const avgRate = rates.length ? (rates.reduce((a, b) => a + b, 0) / rates.length).toFixed(4) : '-';
+    const lastUpdated = history.length ? history[history.length - 1].date : '---';
+
+    container.innerHTML = `
+        <div class="animate-fade-in max-w-md md:max-w-2xl mx-auto px-4 pt-6 pb-12 space-y-6">
+            <h2 class="text-xl font-bold text-gray-800">💴 日圓匯率</h2>
+
+            <!-- Current Rate -->
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 text-center">
+                ${currentRate
+                    ? `<div class="text-4xl font-bold text-teal-700 mb-1">NT$ ${currentRate.toFixed(3)}</div>
+                       <div class="text-sm text-gray-400">每 1 JPY · 更新：${escHtml(lastUpdated)}</div>`
+                    : `<div class="text-2xl font-bold text-gray-400 mb-1">載入中...</div>
+                       <div class="text-sm text-gray-400">正在取得最新匯率</div>`
+                }
+            </div>
+
+            <!-- Stats -->
+            ${rates.length ? `
+            <div class="grid grid-cols-3 gap-3 text-center">
+                <div class="bg-red-50 border border-red-100 rounded-xl p-3">
+                    <div class="text-xs text-red-400 font-bold mb-1">📈 最高</div>
+                    <div class="text-lg font-bold text-red-600">${maxRate}</div>
+                </div>
+                <div class="bg-blue-50 border border-blue-100 rounded-xl p-3">
+                    <div class="text-xs text-blue-400 font-bold mb-1">📉 最低</div>
+                    <div class="text-lg font-bold text-blue-600">${minRate}</div>
+                </div>
+                <div class="bg-gray-50 border border-gray-100 rounded-xl p-3">
+                    <div class="text-xs text-gray-400 font-bold mb-1">➖ 平均</div>
+                    <div class="text-lg font-bold text-gray-600">${avgRate}</div>
+                </div>
+            </div>` : ''}
+
+            <!-- Chart -->
+            ${rates.length >= 2 ? `
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
+                <div class="text-sm font-bold text-gray-600 mb-3 flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-teal-400 inline-block"></span> 近 ${rates.length} 天趨勢
+                </div>
+                <canvas id="rate-chart" height="200"></canvas>
+            </div>` : `
+            <div class="text-center text-gray-400 py-8 text-sm">累積 2 天以上資料後顯示趨勢圖</div>`}
+        </div>
+    `;
+
+    // Render chart after DOM update
+    if (rates.length >= 2) {
+        const ctx = document.getElementById('rate-chart');
+        if (ctx && window.Chart) {
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: history.map(h => h.date.slice(5)), // MM-DD
+                    datasets: [{
+                        data: rates,
+                        borderColor: '#0d9488',
+                        backgroundColor: 'rgba(13, 148, 136, 0.08)',
+                        borderWidth: 2,
+                        pointRadius: 4,
+                        pointBackgroundColor: '#0d9488',
+                        tension: 0.3,
+                        fill: false
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: {
+                            ticks: { callback: v => 'NT$' + v.toFixed(3) },
+                            grid: { color: '#f3f4f6' }
+                        },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+        }
+    }
 }
 
 function getCategoryCardStyle(cat) {

@@ -8,7 +8,7 @@
     <!-- 網頁資安防護 (Security Headers) -->
     <!-- 1. CSP: 限制資源來源，防範 XSS 攻擊 -->
     <meta http-equiv="Content-Security-Policy"
-        content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; frame-src https://www.google.com https://maps.google.com; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self';">
+        content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; frame-src https://www.google.com https://maps.google.com; connect-src 'self' https://open.er-api.com; object-src 'none'; base-uri 'self'; form-action 'self';">
     <!-- 2. 防止網址洩漏來源路徑資訊 -->
     <meta name="referrer" content="strict-origin-when-cross-origin">
     <!-- 3. 防止 MIME 類型嗅探 (防止偽裝成圖片的惡意腳本) -->
@@ -141,6 +141,7 @@
         </div>
     </main>
 
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script src="js/app.js?v=20260216"></script>
 
     <!-- Bottom Tab Bar -->
@@ -160,6 +161,11 @@
           class="tab-btn flex flex-col items-center justify-center gap-0.5 flex-1 h-full text-gray-400 font-medium">
           <span class="text-xl">💰</span>
           <span class="text-[10px]">費用</span>
+        </button>
+        <button onclick="switchTab('rate')" id="tab-rate"
+          class="tab-btn flex flex-col items-center justify-center gap-0.5 flex-1 h-full text-gray-400 font-medium">
+          <span class="text-xl">💴</span>
+          <span class="text-[10px]">匯率</span>
         </button>
       </div>
     </nav>
