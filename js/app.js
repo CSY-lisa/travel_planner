@@ -820,7 +820,6 @@ function renderReferenceView(container) {
                     id="ref-search-input"
                     placeholder="搜尋名稱..."
                     value="${escHtml(referenceSearchQuery)}"
-                    oninput="setReferenceSearch(this.value)"
                     class="w-full border border-gray-200 rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-400 bg-white shadow-sm">
                 <div class="flex gap-2 overflow-x-auto no-scrollbar pb-1">
                     ${catTabs}
@@ -834,6 +833,24 @@ function renderReferenceView(container) {
             </div>
         </div>
     `;
+    attachRefSearchListeners();
+}
+
+function attachRefSearchListeners() {
+    const inp = document.getElementById('ref-search-input');
+    if (!inp) return;
+    inp.focus();
+    inp.setSelectionRange(inp.value.length, inp.value.length);
+
+    let isComposing = false;
+    inp.addEventListener('compositionstart', () => { isComposing = true; });
+    inp.addEventListener('compositionend', (e) => {
+        isComposing = false;
+        window.setReferenceSearch(e.target.value);
+    });
+    inp.addEventListener('input', (e) => {
+        if (!isComposing) window.setReferenceSearch(e.target.value);
+    });
 }
 
 window.setReferenceCategory = function (cat) {
@@ -846,12 +863,7 @@ window.setReferenceSearch = function (val) {
     referenceSearchQuery = val;
     const mainContent = document.getElementById('main-content');
     renderReferenceView(mainContent);
-    // Restore focus and cursor after full re-render
-    const inp = document.getElementById('ref-search-input');
-    if (inp) {
-        inp.focus();
-        inp.setSelectionRange(inp.value.length, inp.value.length);
-    }
+    // attachRefSearchListeners is called inside renderReferenceView
 };
 
 window.setReferenceCity = function (city) {
