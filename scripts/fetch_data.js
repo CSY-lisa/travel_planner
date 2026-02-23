@@ -60,6 +60,47 @@ function processReferenceData(rows) {
         }));
 }
 
+async function syncExchangeRate() {
+    try {
+        console.log('Fetching JPY/TWD exchange rate...');
+        const data = await new Promise((resolve, reject) => {
+            https.get('https://open.er-api.com/v6/latest/JPY', (res) => {
+                if (res.statusCode !== 200) { res.resume(); reject(new Error(`HTTP ${res.statusCode}`)); return; }
+                const chunks = [];
+                res.on('data', c => chunks.push(c));
+                res.on('end', () => resolve(JSON.parse(Buffer.concat(chunks).toString('utf8'))));
+            }).on('error', reject);
+        });
+
+        const rate = data.rates && data.rates.TWD;
+        if (!rate) throw new Error('TWD rate not found in response');
+
+        const historyPath = path.join(__dirname, '../data/exchange_rate_history.json');
+        let history = [];
+        if (fs.existsSync(historyPath)) {
+            history = JSON.parse(fs.readFileSync(historyPath, 'utf8'));
+        }
+
+        const today = new Date().toISOString().split('T')[0];
+        // Update existing entry for today or append new
+        const todayIdx = history.findIndex(h => h.date === today);
+        if (todayIdx >= 0) {
+            history[todayIdx].rate = parseFloat(rate.toFixed(4));
+        } else {
+            history.push({ date: today, rate: parseFloat(rate.toFixed(4)) });
+        }
+
+        // Keep only last 7 entries
+        if (history.length > 7) history = history.slice(-7);
+
+        fs.writeFileSync(historyPath, JSON.stringify(history, null, 2));
+        console.log(`RATE: 1 JPY = ${rate.toFixed(4)} TWD saved.`);
+    } catch (err) {
+        console.error('Exchange rate sync failed:', err.message);
+        // non-fatal: don't process.exit(1)
+    }
+}
+
 async function runSync() {
     console.log('--- Travel Planner Sync (Robust TSV) ---');
     try {
@@ -76,6 +117,7 @@ async function runSync() {
         process.exit(1);
     }
     await syncReferenceData();
+    await syncExchangeRate();
 }
 
 function getWithRedirect(url) {
