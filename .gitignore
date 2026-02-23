@@ -36,7 +36,7 @@ CLAUDE.md
 /data/column_definition.json
 
 
-docs/plans
+# docs/plans
 .claude/skills/continuous-learning/references/*
 
 /temp/
