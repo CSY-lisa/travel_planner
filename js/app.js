@@ -9,6 +9,8 @@ let referenceData = [];
 let referenceActiveCategory = '全部';
 let referenceSearchQuery = '';
 let referenceCityFilter = '全部';
+let jpyToTwd = null; // TWD per 1 JPY, fetched live
+let exchangeRateHistory = []; // [{date, rate}] loaded from JSON
 function parseCostJPY(str) {
     if (!str || str === '-' || str === '') return 0;
     // Extract first number sequence, ignore trailing text like "(單程)"
@@ -58,11 +60,27 @@ function extractCosts() {
     return { transport, attraction };
 }
 
+async function fetchLiveRate() {
+    try {
+        const res = await fetch('https://open.er-api.com/v6/latest/JPY');
+        if (!res.ok) throw new Error('rate fetch failed');
+        const data = await res.json();
+        jpyToTwd = data.rates && data.rates.TWD ? data.rates.TWD : null;
+    } catch (e) {
+        console.warn('Live rate unavailable:', e.message);
+        // fallback: use last entry from history
+        if (exchangeRateHistory.length > 0) {
+            jpyToTwd = exchangeRateHistory[exchangeRateHistory.length - 1].rate;
+        }
+    }
+}
+
 async function fetchData() {
     try {
-        const [travelRes, referenceRes] = await Promise.allSettled([
+        const [travelRes, referenceRes, rateRes] = await Promise.allSettled([
             fetch('data/travel_data.json'),
-            fetch('data/reference_data.json')
+            fetch('data/reference_data.json'),
+            fetch('data/exchange_rate_history.json')
         ]);
 
         if (travelRes.status === 'fulfilled' && travelRes.value.ok) {
@@ -76,6 +94,15 @@ async function fetchData() {
         } else {
             console.warn('reference_data.json not found – reference page will be empty');
         }
+
+        if (rateRes.status === 'fulfilled' && rateRes.value.ok) {
+            exchangeRateHistory = await rateRes.value.json();
+        } else {
+            console.warn('exchange_rate_history.json not found');
+        }
+
+        // Try live rate fetch (non-blocking — initApp runs regardless)
+        fetchLiveRate();
 
         initApp();
     } catch (error) {
