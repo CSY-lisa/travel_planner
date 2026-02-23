@@ -18,6 +18,14 @@ function parseCostJPY(str) {
     return match ? parseInt(match[0]) : 0;
 }
 
+function parseDurMin(s) {
+    if (!s || s === '-') return Infinity;
+    let m = 0;
+    const h = s.match(/(\d+)\s*小時/); if (h) m += parseInt(h[1]) * 60;
+    const min = s.match(/(\d+)\s*分/); if (min) m += parseInt(min[1]);
+    return m || Infinity;
+}
+
 function escHtml(s) {
     return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
@@ -40,15 +48,28 @@ function extractCosts() {
     const transport = [];
     const attraction = [];
 
-    travelData.forEach(day => {
+    travelData.forEach((day, dayIdx) => {
         (day.periods || []).forEach(period => {
             (period.timeline || []).forEach(item => {
-                // Transport costs
-                const tc = parseCostJPY(item.cost);
-                if (tc > 0) {
-                    transport.push({ date: day.date, event: item.event, cost: tc });
+                // Transport: merge primary + alternatives, pick shortest duration
+                const allOptions = [
+                    { cost: item.cost, duration: item.duration, transportType: item.transportType },
+                    ...(item.transportAlternatives || [])
+                ];
+                const validOptions = allOptions.filter(o => parseCostJPY(o.cost) > 0);
+                if (validOptions.length > 0) {
+                    const sorted = [...validOptions].sort((a, b) => parseDurMin(a.duration) - parseDurMin(b.duration));
+                    const best = sorted[0];
+                    transport.push({
+                        date: day.date,
+                        event: item.event,
+                        cost: parseCostJPY(best.cost),
+                        transportType: best.transportType || '',
+                        dayIndex: dayIdx + 1
+                    });
                 }
-                // Attraction costs
+
+                // Attraction costs (unchanged)
                 const ac = parseCostJPY(item.attractionPrice);
                 if (ac > 0) {
                     attraction.push({ date: day.date, event: item.event, cost: ac });
@@ -649,33 +670,53 @@ function renderBudgetView(container) {
     const attractionTotal = attraction.reduce((sum, x) => sum + x.cost, 0);
     const grandTotal = transportTotal + attractionTotal;
 
-    const fmt = (n) => '¥' + n.toLocaleString('ja-JP');
+    const fmtJPY = (n) => '¥' + n.toLocaleString('ja-JP');
+    const fmtTWD = (n) => jpyToTwd ? `NT$${Math.round(n * jpyToTwd).toLocaleString()}` : '';
 
-    const renderRows = (items) => items.map(x => `
-    <tr class="border-b border-gray-100 hover:bg-gray-50">
-      <td class="py-2 px-3 text-xs text-gray-500">${escHtml((x.date || '').slice(5))}</td>
-      <td class="py-2 px-3 text-sm text-gray-700">${escHtml(x.event)}</td>
-      <td class="py-2 px-3 text-sm font-bold text-right text-gray-800">${fmt(x.cost)}</td>
-    </tr>
-  `).join('');
+    const renderTransportRows = (items) => items.map(x => `
+        <tr class="border-b border-gray-100 hover:bg-blue-50 cursor-pointer transition-colors"
+            onclick="location.hash='#day${x.dayIndex}'">
+          <td class="py-2 px-3 text-xs text-gray-500 whitespace-nowrap">${escHtml((x.date || '').slice(5))}</td>
+          <td class="py-2 px-3">
+            <div class="text-sm text-gray-700">${escHtml(x.event)}</div>
+            ${x.transportType ? `<div class="text-xs text-gray-400 mt-0.5">🚌 ${escHtml(x.transportType)}</div>` : ''}
+          </td>
+          <td class="py-2 px-3 text-right">
+            <div class="text-sm font-bold text-gray-800">${fmtJPY(x.cost)}</div>
+            ${fmtTWD(x.cost) ? `<div class="text-xs text-gray-400">${fmtTWD(x.cost)}</div>` : ''}
+          </td>
+        </tr>
+    `).join('');
+
+    const renderAttractionRows = (items) => items.map(x => `
+        <tr class="border-b border-gray-100 hover:bg-gray-50">
+          <td class="py-2 px-3 text-xs text-gray-500">${escHtml((x.date || '').slice(5))}</td>
+          <td class="py-2 px-3 text-sm text-gray-700">${escHtml(x.event)}</td>
+          <td class="py-2 px-3 text-sm font-bold text-right text-gray-800">${fmtJPY(x.cost)}</td>
+        </tr>
+    `).join('');
 
     container.innerHTML = `
     <div class="animate-fade-in max-w-md md:max-w-2xl mx-auto px-4 pt-6 pb-12 space-y-6">
       <h2 class="text-xl font-bold text-gray-800">💰 費用總覽</h2>
+      ${jpyToTwd ? `<div class="text-xs text-gray-400 text-right">匯率參考：1 JPY = NT$${jpyToTwd.toFixed(3)}</div>` : ''}
 
       <!-- Summary Cards -->
       <div class="grid grid-cols-3 gap-3">
         <div class="bg-blue-50 border border-blue-100 rounded-xl p-4 text-center">
           <div class="text-xs text-blue-500 font-bold mb-1">🚆 交通</div>
-          <div class="text-lg font-bold text-blue-700">${fmt(transportTotal)}</div>
+          <div class="text-lg font-bold text-blue-700">${fmtJPY(transportTotal)}</div>
+          ${fmtTWD(transportTotal) ? `<div class="text-xs text-blue-400">${fmtTWD(transportTotal)}</div>` : ''}
         </div>
         <div class="bg-emerald-50 border border-emerald-100 rounded-xl p-4 text-center">
           <div class="text-xs text-emerald-500 font-bold mb-1">🏯 景點</div>
-          <div class="text-lg font-bold text-emerald-700">${fmt(attractionTotal)}</div>
+          <div class="text-lg font-bold text-emerald-700">${fmtJPY(attractionTotal)}</div>
+          ${fmtTWD(attractionTotal) ? `<div class="text-xs text-emerald-400">${fmtTWD(attractionTotal)}</div>` : ''}
         </div>
         <div class="bg-teal-600 rounded-xl p-4 text-center shadow-md">
           <div class="text-xs text-teal-100 font-bold mb-1">🎯 合計</div>
-          <div class="text-lg font-bold text-white">${fmt(grandTotal)}</div>
+          <div class="text-lg font-bold text-white">${fmtJPY(grandTotal)}</div>
+          ${fmtTWD(grandTotal) ? `<div class="text-xs text-teal-200">${fmtTWD(grandTotal)}</div>` : ''}
         </div>
       </div>
 
@@ -683,6 +724,7 @@ function renderBudgetView(container) {
       <div>
         <h3 class="text-sm font-bold text-gray-600 mb-2 flex items-center gap-2">
           <span class="w-2 h-2 rounded-full bg-blue-400 inline-block"></span> 交通費用明細
+          <span class="text-xs text-gray-400 font-normal">（點擊查看行程）</span>
         </h3>
         <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
           <table class="w-full">
@@ -693,11 +735,14 @@ function renderBudgetView(container) {
                 <th class="py-2 px-3 text-right text-xs text-gray-400 font-bold">金額</th>
               </tr>
             </thead>
-            <tbody>${renderRows(transport)}</tbody>
+            <tbody>${renderTransportRows(transport)}</tbody>
             <tfoot class="bg-blue-50 border-t border-blue-100">
               <tr>
                 <td colspan="2" class="py-2 px-3 text-xs font-bold text-blue-700">小計</td>
-                <td class="py-2 px-3 text-sm font-bold text-right text-blue-700">${fmt(transportTotal)}</td>
+                <td class="py-2 px-3 text-right">
+                  <div class="text-sm font-bold text-blue-700">${fmtJPY(transportTotal)}</div>
+                  ${fmtTWD(transportTotal) ? `<div class="text-xs text-blue-400">${fmtTWD(transportTotal)}</div>` : ''}
+                </td>
               </tr>
             </tfoot>
           </table>
@@ -718,11 +763,11 @@ function renderBudgetView(container) {
                 <th class="py-2 px-3 text-right text-xs text-gray-400 font-bold">金額</th>
               </tr>
             </thead>
-            <tbody>${renderRows(attraction)}</tbody>
+            <tbody>${renderAttractionRows(attraction)}</tbody>
             <tfoot class="bg-emerald-50 border-t border-emerald-100">
               <tr>
                 <td colspan="2" class="py-2 px-3 text-xs font-bold text-emerald-700">小計</td>
-                <td class="py-2 px-3 text-sm font-bold text-right text-emerald-700">${fmt(attractionTotal)}</td>
+                <td class="py-2 px-3 text-sm font-bold text-right text-emerald-700">${fmtJPY(attractionTotal)}</td>
               </tr>
             </tfoot>
           </table>
