@@ -652,7 +652,7 @@
             "specialNotes": "-",
             "transportAlternatives": [
               {
-                "transportType": "JR山陽本線（往吳線 廣）方向 - 矢野站 - 轉計程車或廣電巴士",
+                "transportType": "JR吳線 - 矢野站 - 轉計程車",
                 "transportPayment": "MOBIRY DAYS / ICOCA / 現金",
                 "start": "廣島站 (広島駅)",
                 "end": "矢野站",
@@ -662,11 +662,11 @@
                 "link": ""
               },
               {
-                "transportType": "JR山陽本線（往吳線 廣）方向 - 矢野站 - 轉廣電巴士[40-12]",
+                "transportType": "JR吳線 - 矢野站 - 轉廣電巴士 (Hiroden Bus) 熊野線 [40-12]",
                 "transportPayment": "MOBIRY DAYS / ICOCA / 現金",
                 "start": "廣島站 (広島駅)",
                 "end": "熊野中筋站",
-                "transportFreq": "JR班次多 -  10分鐘一班",
+                "transportFreq": "JR班次多 -  10分鐘一班,廣電巴士假日少",
                 "duration": "30分左右（JR20分，計程車10-15分）",
                 "cost": "¥600 (JR ¥220 + 巴士¥380）",
                 "link": ""
@@ -757,7 +757,7 @@
             "link": "https://www.hiroden.co.jp/bus/route/e-40.html#tab2",
             "start": "熊野町役場前",
             "end": "広島バスセンター",
-            "transportFreq": "-",
+            "transportFreq": "假日班次較少，沒搭上這班去矢野站換車",
             "duration": "50分",
             "cost": "¥650",
             "attractionWebsite": "-",
