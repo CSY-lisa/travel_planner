@@ -676,8 +676,16 @@ function renderBudgetView(container) {
     const fmtJPY = (n) => '¥' + n.toLocaleString('ja-JP');
     const fmtTWD = (n) => jpyToTwd ? `NT$${Math.round(n * jpyToTwd).toLocaleString()}` : '';
 
-    const renderTransportRows = (items) => items.map(x => `
-        <tr class="border-b border-gray-100 hover:bg-blue-50 cursor-pointer transition-colors"
+    const renderTransportRows = (items) => {
+        let dayBg = 'bg-white';
+        let lastDate = null;
+        return items.map(x => {
+            if (x.date !== lastDate) {
+                lastDate = x.date;
+                dayBg = dayBg === 'bg-white' ? 'bg-gray-50' : 'bg-white';
+            }
+            return `
+        <tr class="${dayBg} border-b border-gray-100 hover:bg-blue-50 cursor-pointer transition-colors"
             onclick="location.hash='#day${x.dayIndex}'">
           <td class="py-2 px-3 text-xs text-gray-500 whitespace-nowrap">${escHtml((x.date || '').slice(5))}</td>
           <td class="py-2 px-3">
@@ -688,8 +696,9 @@ function renderBudgetView(container) {
             <div class="text-sm font-bold text-gray-800">${fmtJPY(x.cost)}</div>
             ${fmtTWD(x.cost) ? `<div class="text-xs text-gray-400">${fmtTWD(x.cost)}</div>` : ''}
           </td>
-        </tr>
-    `).join('');
+        </tr>`;
+        }).join('');
+    };
 
     const renderAttractionRows = (items) => items.map(x => `
         <tr class="border-b border-gray-100 hover:bg-gray-50">
