@@ -899,32 +899,38 @@ function getCategoryCardStyle(cat) {
         case '交通': return {
             card:       'bg-sky-50 border-sky-100',
             badge:      'bg-indigo-100 text-indigo-700',
-            cityBadge:  'bg-emerald-100 text-emerald-700 border-emerald-200'
+            cityBadge:  'bg-emerald-100 text-emerald-700 border-emerald-200',
+            divider:    'border-sky-300'
         };
         case '餐廳': return {
             card:       'bg-orange-50 border-orange-100',
             badge:      'bg-violet-100 text-violet-700',
-            cityBadge:  'bg-sky-100 text-sky-700 border-sky-200'
+            cityBadge:  'bg-sky-100 text-sky-700 border-sky-200',
+            divider:    'border-orange-300'
         };
         case '景點': return {
             card:       'bg-emerald-50 border-emerald-100',
             badge:      'bg-indigo-100 text-indigo-700',
-            cityBadge:  'bg-amber-100 text-amber-700 border-amber-200'
+            cityBadge:  'bg-amber-100 text-amber-700 border-amber-200',
+            divider:    'border-emerald-300'
         };
         case '住宿': return {
             card:       'bg-violet-50 border-violet-100',
             badge:      'bg-amber-100 text-amber-700',
-            cityBadge:  'bg-sky-100 text-sky-700 border-sky-200'
+            cityBadge:  'bg-sky-100 text-sky-700 border-sky-200',
+            divider:    'border-violet-300'
         };
         case '購物': return {
             card:       'bg-amber-50 border-amber-100',
             badge:      'bg-teal-100 text-teal-700',
-            cityBadge:  'bg-indigo-100 text-indigo-700 border-indigo-200'
+            cityBadge:  'bg-indigo-100 text-indigo-700 border-indigo-200',
+            divider:    'border-amber-300'
         };
         default:     return {
             card:       'bg-slate-50 border-slate-100',
             badge:      'bg-teal-100 text-teal-700',
-            cityBadge:  'bg-sky-100 text-sky-700 border-sky-200'
+            cityBadge:  'bg-sky-100 text-sky-700 border-sky-200',
+            divider:    'border-slate-200'
         };
     }
 }
@@ -984,7 +990,7 @@ function renderReferenceView(container) {
                 ${item.notes ? `<p class="text-xs text-gray-500 bg-white/70 rounded-lg p-2 border border-white">${escHtml(item.notes)}</p>` : ''}
 
                 <!-- Links Row -->
-                <div class="flex gap-3 flex-wrap pt-1 border-t border-white/60">
+                <div class="flex gap-3 flex-wrap pt-1 border-t ${style.divider}">
                     ${item.website && /^https?:\/\//i.test(item.website) ? `<a href="${escHtml(item.website)}" target="_blank" rel="noopener noreferrer" class="text-xs font-bold text-blue-600 hover:underline">🌐 官網</a>` : ''}
                     ${item.mapUrl ? `<button onclick="toggleMap('ref-map-${idx}')" class="text-xs font-bold text-emerald-600 hover:underline">📍 地圖 ▼</button>` : ''}
                 </div>
