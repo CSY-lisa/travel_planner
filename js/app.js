@@ -706,12 +706,12 @@ function renderBudgetView(container) {
 
       <!-- Summary Cards -->
       <div class="grid grid-cols-3 gap-3">
-        <div class="bg-blue-50 border border-blue-100 rounded-xl p-4 text-center">
+        <div class="bg-blue-50 border border-blue-100 rounded-xl p-4 text-center cursor-pointer hover:shadow-md transition-shadow" onclick="document.getElementById('budget-transport-section').scrollIntoView({behavior:'smooth'})">
           <div class="text-xs text-blue-500 font-bold mb-1">🚆 交通</div>
           <div class="text-lg font-bold text-blue-700">${fmtJPY(transportTotal)}</div>
           ${fmtTWD(transportTotal) ? `<div class="text-xs text-blue-400">${fmtTWD(transportTotal)}</div>` : ''}
         </div>
-        <div class="bg-emerald-50 border border-emerald-100 rounded-xl p-4 text-center">
+        <div class="bg-emerald-50 border border-emerald-100 rounded-xl p-4 text-center cursor-pointer hover:shadow-md transition-shadow" onclick="document.getElementById('budget-attraction-section').scrollIntoView({behavior:'smooth'})">
           <div class="text-xs text-emerald-500 font-bold mb-1">🏯 景點</div>
           <div class="text-lg font-bold text-emerald-700">${fmtJPY(attractionTotal)}</div>
           ${fmtTWD(attractionTotal) ? `<div class="text-xs text-emerald-400">${fmtTWD(attractionTotal)}</div>` : ''}
@@ -724,7 +724,7 @@ function renderBudgetView(container) {
       </div>
 
       <!-- Transport Detail Table -->
-      <div>
+      <div id="budget-transport-section">
         <h3 class="text-sm font-bold text-gray-600 mb-2 flex items-center gap-2">
           <span class="w-2 h-2 rounded-full bg-blue-400 inline-block"></span> 交通費用明細
           <span class="text-xs text-gray-400 font-normal">（點擊查看行程）</span>
@@ -753,7 +753,7 @@ function renderBudgetView(container) {
       </div>
 
       <!-- Attraction Detail Table -->
-      <div>
+      <div id="budget-attraction-section">
         <h3 class="text-sm font-bold text-gray-600 mb-2 flex items-center gap-2">
           <span class="w-2 h-2 rounded-full bg-emerald-400 inline-block"></span> 景點費用明細
         </h3>
