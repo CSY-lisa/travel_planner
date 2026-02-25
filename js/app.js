@@ -72,7 +72,7 @@ function extractCosts() {
                 // Attraction costs (unchanged)
                 const ac = parseCostJPY(item.attractionPrice);
                 if (ac > 0) {
-                    attraction.push({ date: day.date, event: item.event, cost: ac });
+                    attraction.push({ date: day.date, event: item.event, cost: ac, city: item.city || '' });
                 }
             });
         });
@@ -700,13 +700,26 @@ function renderBudgetView(container) {
         }).join('');
     };
 
-    const renderAttractionRows = (items) => items.map(x => `
-        <tr class="border-b border-gray-100 hover:bg-gray-50">
+    const renderAttractionRows = (items) => {
+        let dayBg = 'bg-white';
+        let lastDate = null;
+        return items.map(x => {
+            if (x.date !== lastDate) {
+                lastDate = x.date;
+                dayBg = dayBg === 'bg-white' ? 'bg-gray-50' : 'bg-white';
+            }
+            return `
+        <tr class="${dayBg} border-b border-gray-100 hover:bg-gray-50">
           <td class="py-2 px-3 text-xs text-gray-500">${escHtml((x.date || '').slice(5))}</td>
+          <td class="py-2 px-3 text-xs text-gray-400">${escHtml(x.city || '-')}</td>
           <td class="py-2 px-3 text-sm text-gray-700">${escHtml(x.event)}</td>
-          <td class="py-2 px-3 text-sm font-bold text-right text-gray-800">${fmtJPY(x.cost)}</td>
-        </tr>
-    `).join('');
+          <td class="py-2 px-3 text-right">
+            <div class="text-sm font-bold text-gray-800">${fmtJPY(x.cost)}</div>
+            ${fmtTWD(x.cost) ? `<div class="text-xs text-gray-400">${fmtTWD(x.cost)}</div>` : ''}
+          </td>
+        </tr>`;
+        }).join('');
+    };
 
     container.innerHTML = `
     <div class="animate-fade-in max-w-md md:max-w-2xl mx-auto px-4 pt-6 pb-12 space-y-6">
@@ -771,6 +784,7 @@ function renderBudgetView(container) {
             <thead class="bg-gray-50 border-b border-gray-100">
               <tr>
                 <th class="py-2 px-3 text-left text-xs text-gray-400 font-bold">日期</th>
+                <th class="py-2 px-3 text-left text-xs text-gray-400 font-bold">城市</th>
                 <th class="py-2 px-3 text-left text-xs text-gray-400 font-bold">項目</th>
                 <th class="py-2 px-3 text-right text-xs text-gray-400 font-bold">金額</th>
               </tr>
@@ -778,8 +792,11 @@ function renderBudgetView(container) {
             <tbody>${renderAttractionRows(attraction)}</tbody>
             <tfoot class="bg-emerald-50 border-t border-emerald-100">
               <tr>
-                <td colspan="2" class="py-2 px-3 text-xs font-bold text-emerald-700">小計</td>
-                <td class="py-2 px-3 text-sm font-bold text-right text-emerald-700">${fmtJPY(attractionTotal)}</td>
+                <td colspan="3" class="py-2 px-3 text-xs font-bold text-emerald-700">小計</td>
+                <td class="py-2 px-3 text-right">
+                  <div class="text-sm font-bold text-emerald-700">${fmtJPY(attractionTotal)}</div>
+                  ${fmtTWD(attractionTotal) ? `<div class="text-xs text-emerald-400">${fmtTWD(attractionTotal)}</div>` : ''}
+                </td>
               </tr>
             </tfoot>
           </table>
