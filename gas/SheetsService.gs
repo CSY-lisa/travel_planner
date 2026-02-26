@@ -70,6 +70,7 @@ function overwriteRow(data, rowIndex, props) {
       : props.getProperty('REFERENCE_SHEET_GID');
     const sheet = getSheetByGid(ss, gid);
     updateByHeaders(sheet, rowIndex, data.fields);
+    sortSheet(sheet, data.type);
     formatSheet(sheet, data.type);
   } catch (err) {
     Logger.log('Sheets overwrite error: ' + err.message);

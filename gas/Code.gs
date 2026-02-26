@@ -152,7 +152,9 @@ function _handleMessage(userId, replyToken, text, props) {
           : props.getProperty('REFERENCE_SHEET_GID');
         const sheet = getSheetByGid(ss, gid);
         deleteRow(sheet, delData.rowIndex);
-        formatSheet(sheet, delData.type);
+        try { formatSheet(sheet, delData.type); } catch (fmtErr) {
+          Logger.log('formatSheet after delete failed (non-critical): ' + fmtErr.message);
+        }
         cache.remove(pendingDelKey);
         sendLineReply(replyToken, `✅ 已刪除：${delData.desc}`, props);
       } catch (err) {
