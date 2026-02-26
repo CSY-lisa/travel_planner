@@ -1,1 +1,26 @@
-[]
+[
+  {
+    "category": "緊急聯絡",
+    "title": "日本政府提供24小時中文緊急服務專線",
+    "content": "日本觀光局為因應外國旅客發生事故、災害或受傷等緊急需要或針對一般旅行資訊，提供全年無休24小時中文、英文、韓文及日文服務電話專線(Japan Visitor Hotline)。 日本全境：050-3816-2787 海外撥打：81-50-3816-2787",
+    "link": "https://www.roc-taiwan.org/jpna/post/3323.html"
+  },
+  {
+    "category": "緊急聯絡",
+    "title": "旅外國人急難救助服務專線（台灣代表處）",
+    "content": "手機 ：自國內撥打： (81-80)1009-7179，(81-80)1009-7436；日本境內直撥：080-1009-7179，080-1009-7436",
+    "link": "https://www.boca.gov.tw/sp-foof-countrycp-02-29-77969-1.html"
+  },
+  {
+    "category": "旅遊保險",
+    "title": "TOKIO OMOTENASHI POLICY | 日本旅遊保險",
+    "content": "入境日本後才可以保，隔天生效",
+    "link": "https://tokiomarinenichido.jp/zh-hant/china2/"
+  },
+  {
+    "category": "入境手續",
+    "title": "VJW",
+    "content": "出發前 6 小時完成",
+    "link": "https://vjw.digital.go.jp"
+  }
+]
