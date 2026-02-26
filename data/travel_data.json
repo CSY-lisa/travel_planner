@@ -108,7 +108,7 @@
             "event": "廣島城 (鯉城)",
             "description": "參觀天守閣與周邊護城河",
             "transportType": "廣電 (Hiroden) 1號線 / 2號線 / 6號線",
-            "transportPayment": "MOBIRY DAYS / ICOCA",
+            "transportPayment": "MOBIRY DAYS / ICOCA / Apple Pay",
             "mapUrl": "https://maps.google.com/maps?q=Hiroshima+Castle&t=&z=15&ie=UTF8&iwloc=&output=embed",
             "link": "https://www.hiroden.co.jp/train/index.html",
             "start": "廣島站 (広島駅)",
@@ -125,7 +125,7 @@
             "transportAlternatives": [
               {
                 "transportType": "循環觀光巴士 : 広島市内循環線（めいぷる～ぷ）",
-                "transportPayment": "MOBIRY DAYS / ICOCA",
+                "transportPayment": "MOBIRY DAYS / ICOCA / Apple Pay",
                 "start": "廣島站新幹線口(廣島駅新幹線口 )",
                 "end": "廣島城-在護國神社前(広島城-護國神社前)",
                 "transportFreq": "橘線-1hr/1班 ; 黃線-30min/1班",
@@ -135,7 +135,7 @@
               },
               {
                 "transportType": "廣島巴士 30-3號 / 30-6號",
-                "transportPayment": "MOBIRY DAYS / ICOCA",
+                "transportPayment": "MOBIRY DAYS / ICOCA / Apple Pay",
                 "start": "廣島站 (広島駅)",
                 "end": "合同廳舍前-廣島市(合同庁舎前-広島市)",
                 "transportFreq": "10-15分一班",
@@ -835,13 +835,13 @@
             "city": "廣島",
             "event": "前往西條",
             "description": "JR 山陽本線",
-            "transportType": "JR山陽本線 (JR Sanyo Main Line)",
+            "transportType": "JR山陽本線 (JR Sanyo Main Line) 普通糸崎",
             "transportPayment": "ICOCA / Apple Pay / 現金",
             "mapUrl": null,
             "link": "https://www.westjr.co.jp/global/tc/",
             "start": "廣島站 (広島駅)",
             "end": "西條站 (西条駅)",
-            "transportFreq": "-",
+            "transportFreq": "約15 分一班",
             "duration": "35分",
             "cost": "¥590",
             "attractionWebsite": "-",
@@ -856,7 +856,7 @@
             "type": "景點",
             "city": "西條",
             "event": "西條酒藏通",
-            "description": "酒造巡禮與試飲",
+            "description": "酒造巡禮與試飲（福美人）",
             "transportType": "步行 (Walk)",
             "transportPayment": "-",
             "mapUrl": "https://maps.google.com/maps?q=Saijo+Sakagura+Dori&t=&z=15&ie=UTF8&iwloc=&output=embed",
@@ -929,21 +929,43 @@
             "city": "廣島",
             "event": "廣島美術館",
             "description": "西洋名畫巡禮",
-            "transportType": "路面電車 1號線 / 2號線 / 6號線",
-            "transportPayment": "MOBIRY DAYS / ICOCA / 現金",
+            "transportType": "廣電 (Hiroden) 1號線 / 2號線 / 6號線",
+            "transportPayment": "MOBIRY DAYS / ICOCA / Apple Pay",
             "mapUrl": "https://maps.google.com/maps?q=Hiroshima+Museum+of+Art&t=&z=15&ie=UTF8&iwloc=&output=embed",
             "link": "https://www.hiroshima-museum.jp/",
             "start": "廣島站 (広島駅)",
             "end": "紙屋町東 (Kamiya-cho-higashi)",
-            "transportFreq": "路面電車",
-            "duration": "15分",
-            "cost": "¥220",
+            "transportFreq": "10-15分一班",
+            "duration": "20分",
+            "cost": "¥240",
             "attractionWebsite": "https://www.hiroshima-museum.jp/",
             "attractionPrice": "¥1,300",
             "attractionHours": "09:00-17:00",
             "attractionIntro": "1. 展示雷諾瓦等世界名畫; 2. 優雅圓頂建築設計; 3. 市中心靜謐的人文空間。",
             "attractionDuration": "1.5 hr",
-            "specialNotes": "特展『繪畫中白色的秘密』期間，週一特別開館。"
+            "specialNotes": "特展『繪畫中白色的秘密』期間，週一特別開館。",
+            "transportAlternatives": [
+              {
+                "transportType": "循環觀光巴士 : 広島市内循環線（めいぷる～ぷ）",
+                "transportPayment": "MOBIRY DAYS / ICOCA / Apple Pay",
+                "start": "廣島站新幹線口(廣島駅新幹線口 )",
+                "end": "廣島城-在護國神社前(広島城-護國神社前)",
+                "transportFreq": "橘線-1hr/1班 ; 黃線-30min/1班",
+                "duration": "9分",
+                "cost": "¥240 ( 一日券¥600)",
+                "link": ""
+              },
+              {
+                "transportType": "廣島巴士 30-3號 / 30-6號",
+                "transportPayment": "MOBIRY DAYS / ICOCA / Apple Pay",
+                "start": "廣島站 (広島駅)",
+                "end": "合同廳舍前-廣島市(合同庁舎前-広島市)",
+                "transportFreq": "10-15分一班",
+                "duration": "13分",
+                "cost": "¥240",
+                "link": ""
+              }
+            ]
           }
         ]
       },
@@ -971,7 +993,7 @@
             "attractionHours": "17:00-23:00",
             "attractionIntro": "1. 超人氣黑毛和牛燒肉; 2. 8,000套餐含暢飲; 3. 下班後放鬆燒肉饗宴。",
             "attractionDuration": "2.0 hr",
-            "specialNotes": "備註：8000套餐含喝到飽"
+            "specialNotes": "有預約18:00"
           }
         ]
       }
@@ -979,14 +1001,14 @@
   },
   {
     "date": "2026/03/10",
-    "dayOfWeek": "Wed.",
+    "dayOfWeek": "Tue.",
     "periods": [
       {
         "period": "早上",
         "timeRange": "",
         "timeline": [
           {
-            "time": "8:30",
+            "time": "9:29",
             "type": "交通",
             "city": "廣島",
             "event": "前往竹原",
@@ -994,21 +1016,21 @@
             "transportType": "高速巴士 (Geiyo Bus Kaguya-hime Go)",
             "transportPayment": "ICOCA / Apple Pay / 現金",
             "mapUrl": "https://maps.google.com/maps?q=Hiroshima+Station&t=&z=15&ie=UTF8&iwloc=&output=embed",
-            "link": "https://www.geiyo.co.jp/",
+            "link": "高速バス - 竹原～広島線「かぐや姫号」",
             "start": "廣島站 (広島駅)",
-            "end": "竹原中通 (Takehara Chuo)",
-            "transportFreq": "-",
-            "duration": "75分",
+            "end": "竹原中央",
+            "transportFreq": "1小時1班/8:34-9:45/9:29-10:34am",
+            "duration": "60-75分",
             "cost": "¥1,400",
             "attractionWebsite": "-",
             "attractionPrice": "-",
             "attractionHours": "-",
             "attractionIntro": "-",
             "attractionDuration": "-",
-            "specialNotes": "預計 2026/2 改點，請出發前再確認時刻表。"
+            "specialNotes": "出發前再確認時刻表。可用https://kuruken.jp/查站牌資訊"
           },
           {
-            "time": "10:30",
+            "time": "10:34",
             "type": "景點",
             "city": "竹原",
             "event": "竹原老街保存區",
@@ -1040,7 +1062,7 @@
             "type": "用餐",
             "city": "竹原",
             "event": "老街午餐",
-            "description": "蕎麥麵料理",
+            "description": "蕎麥麵料理 / 台灣料理",
             "transportType": "步行 (Walk)",
             "transportPayment": "-",
             "mapUrl": null,
@@ -1058,7 +1080,7 @@
             "specialNotes": "-"
           },
           {
-            "time": "16:30",
+            "time": "15:20",
             "type": "交通",
             "city": "竹原",
             "event": "返回廣島",
@@ -1066,18 +1088,18 @@
             "transportType": "高速巴士 (Geiyo Bus Kaguya-hime Go)",
             "transportPayment": "ICOCA / Apple Pay / 現金",
             "mapUrl": null,
-            "link": "-",
-            "start": "竹原 (Takehara)",
+            "link": "https://www.geiyo.co.jp/expwy_bus.html",
+            "start": "竹原中央",
             "end": "廣島站 (広島駅)",
-            "transportFreq": "-",
-            "duration": "75分",
+            "transportFreq": "1小時1班/15:20-16:26/16:25-17:33",
+            "duration": "60-75分",
             "cost": "¥1,400",
             "attractionWebsite": "-",
             "attractionPrice": "-",
             "attractionHours": "-",
             "attractionIntro": "-",
             "attractionDuration": "-",
-            "specialNotes": "-"
+            "specialNotes": "出發前再確認時刻表。可用https://kuruken.jp/查站牌資訊"
           }
         ]
       }
