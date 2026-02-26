@@ -1110,3 +1110,96 @@ window.setReferenceCity = function (city) {
     const mainContent = document.getElementById('main-content');
     renderReferenceView(mainContent);
 };
+
+function renderImportantView(container) {
+    const categories = ['全部', ...new Set(importantData.map(x => x.category).filter(Boolean))];
+
+    const q = importantSearchQuery.toLowerCase().trim();
+    const filtered = importantData.filter(x => {
+        const catMatch = importantActiveCategory === '全部' || x.category === importantActiveCategory;
+        const titleMatch = !q || (x.title || '').toLowerCase().includes(q);
+        const contentMatch = !q || (x.content || '').toLowerCase().includes(q);
+        return catMatch && (titleMatch || contentMatch);
+    });
+
+    const catChips = categories.map(cat => {
+        const style = getImportantCardStyle(cat);
+        const isActive = cat === importantActiveCategory;
+        return `
+            <button onclick="setImportantCategory('${escHtml(cat)}')"
+                class="flex-shrink-0 px-4 py-1.5 rounded-full text-sm font-bold transition-all ${isActive
+                ? style.chip
+                : 'bg-white text-gray-600 border border-gray-300'
+            }">
+                ${escHtml(cat)}
+            </button>
+        `;
+    }).join('');
+
+    const cards = filtered.length === 0
+        ? '<div class="text-center text-gray-400 py-12">找不到符合的資料 🔍</div>'
+        : filtered.map(item => {
+            const style = getImportantCardStyle(item.category);
+            const hasLink = item.link && /^https?:\/\//i.test(item.link);
+            return `
+            <div class="${style.card} rounded-xl shadow-sm border p-4 space-y-2 hover:shadow-md transition-shadow">
+                <div class="flex items-start justify-between gap-2">
+                    <h3 class="font-bold text-gray-800 text-base leading-tight">${escHtml(item.title)}</h3>
+                    <span class="flex-shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-full ${style.badge}">${escHtml(item.category)}</span>
+                </div>
+                <p class="text-sm text-gray-600 leading-relaxed">${escHtml(item.content)}</p>
+                ${hasLink ? `
+                <div class="pt-1 border-t ${style.divider}">
+                    <a href="${escHtml(item.link)}" target="_blank" rel="noopener noreferrer"
+                        class="text-xs font-bold text-blue-600 hover:underline">🔗 前往連結</a>
+                </div>` : ''}
+            </div>
+        `;
+        }).join('');
+
+    container.innerHTML = `
+        <div class="animate-fade-in max-w-md md:max-w-2xl mx-auto px-4 pt-6 pb-12 space-y-5">
+            <h2 class="text-xl font-bold text-gray-800">🆘 重要旅遊資訊</h2>
+
+            <!-- Search + Category Filters -->
+            <div class="space-y-2">
+                <input type="text"
+                    id="important-search-input"
+                    placeholder="搜尋標題、內容..."
+                    value="${escHtml(importantSearchQuery)}"
+                    oninput="setImportantSearch(this.value)"
+                    class="w-full border border-gray-200 rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-400 bg-white shadow-sm">
+
+                <div class="flex gap-2 flex-wrap">
+                    ${catChips}
+                </div>
+            </div>
+
+            <!-- Cards -->
+            <div class="space-y-3">
+                ${cards}
+            </div>
+        </div>
+    `;
+
+    attachImportantSearchListeners();
+}
+
+function attachImportantSearchListeners() {
+    const inp = document.getElementById('important-search-input');
+    if (!inp) return;
+    inp.focus();
+    inp.setSelectionRange(inp.value.length, inp.value.length);
+}
+
+window.setImportantCategory = function (cat) {
+    importantActiveCategory = cat;
+    const mainContent = document.getElementById('main-content');
+    renderImportantView(mainContent);
+};
+
+window.setImportantSearch = function (val) {
+    importantSearchQuery = val;
+    const mainContent = document.getElementById('main-content');
+    renderImportantView(mainContent);
+};
