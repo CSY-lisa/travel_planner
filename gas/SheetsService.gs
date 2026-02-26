@@ -30,6 +30,24 @@ function checkAndWrite(data, props) {
       formatSheet(sheet, data.type);
       return { action: 'appended' };
 
+    } else if (data.type === 'important') {
+      const sheet = getSheetByGid(ss, props.getProperty('IMPORTANT_INFO_SHEET_GID'));
+      const title = (data.fields['title'] || '').trim();
+      if (title) {
+        const existing = findRowByKey(sheet, { 'title': title });
+        if (existing) {
+          return {
+            action: 'duplicate',
+            rowIndex: existing.rowIndex,
+            existingDesc: `title「${title}」`
+          };
+        }
+      }
+      appendByHeaders(sheet, data.fields);
+      sortSheet(sheet, 'important');
+      formatSheet(sheet, 'important');
+      return { action: 'appended' };
+
     } else {
       // reference data
       const sheet = getSheetByGid(ss, props.getProperty('REFERENCE_SHEET_GID'));
@@ -67,7 +85,9 @@ function overwriteRow(data, rowIndex, props) {
     const ss = SpreadsheetApp.openById(sheetId);
     const gid = data.type === 'travel'
       ? props.getProperty('TRAVEL_SHEET_GID')
-      : props.getProperty('REFERENCE_SHEET_GID');
+      : data.type === 'important'
+        ? props.getProperty('IMPORTANT_INFO_SHEET_GID')
+        : props.getProperty('REFERENCE_SHEET_GID');
     const sheet = getSheetByGid(ss, gid);
     updateByHeaders(sheet, rowIndex, data.fields);
     sortSheet(sheet, data.type);
