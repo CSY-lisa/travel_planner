@@ -201,7 +201,7 @@ function formatSheet(sheet, type) {
   if (lastRow < 2) return;
 
   // 資料列交替底色（依日期 / 類別 分組）
-  const headers = sheet.getRange(1, 1, 1, lastCol).getValues()[0];
+  const headers = headerRange.getValues()[0];
   const groupColName = (type === 'travel') ? '日期'
     : (type === 'important') ? 'category'
     : '類別';
@@ -210,7 +210,7 @@ function formatSheet(sheet, type) {
   const dataValues = sheet.getRange(2, 1, lastRow - 1, lastCol).getValues();
   const lightColor = (type === 'travel') ? '#E8F0FE' : '#E8F5E9';
 
-  let groupIdx = -1;
+  let groupIdx = 0;
   let lastGroupVal = null;
   const colors = [];
 
@@ -220,7 +220,7 @@ function formatSheet(sheet, type) {
       : String(i); // fallback: alternate every row
     if (groupVal && groupVal !== lastGroupVal) {
       lastGroupVal = groupVal;
-      groupIdx++;
+      if (i > 0) groupIdx++;  // don't increment on first group
     }
     const bg = (groupIdx % 2 === 0) ? '#FFFFFF' : lightColor;
     colors.push(Array(lastCol).fill(bg));
