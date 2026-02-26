@@ -152,7 +152,7 @@ function findRowByKey(sheet, keys) {
     if (match) {
       // 收集幾個關鍵欄位值，供顯示給用戶
       const existingValues = {};
-      ['活動標題', '城市', '名稱', '類別', '時段'].forEach(key => {
+      ['活動標題', '城市', '名稱', '類別', '時段', 'title', 'content'].forEach(key => {
         const idx = headers.indexOf(key);
         if (idx !== -1) existingValues[key] = data[i][idx] ? data[i][idx].toString() : '';
       });
