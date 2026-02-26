@@ -164,7 +164,7 @@ function handleRouting() {
     const dayNav = document.getElementById('nav-container');
 
     // Day nav: only visible on itinerary tab
-    if (hash === '#reference' || hash === '#budget' || hash === '#rate') {
+    if (hash === '#reference' || hash === '#budget' || hash === '#rate' || hash === '#important') {
         dayNav.style.display = 'none';
     } else {
         dayNav.style.display = '';
@@ -190,6 +190,9 @@ function handleRouting() {
     } else if (hash === '#rate') {
         renderRateView(mainContent);
         updateTabState('rate');
+    } else if (hash === '#important') {
+        renderImportantView(mainContent);
+        updateTabState('important');
     }
 }
 
