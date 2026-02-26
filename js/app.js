@@ -945,6 +945,41 @@ function getCategoryCardStyle(cat) {
     }
 }
 
+function getImportantCardStyle(cat) {
+    switch (cat) {
+        case '緊急聯絡': return {
+            card:  'bg-red-50 border-red-100',
+            badge: 'bg-red-100 text-red-700',
+            chip:  'bg-red-600 text-white shadow-md',
+            divider: 'border-red-200'
+        };
+        case '入境手續': return {
+            card:  'bg-blue-50 border-blue-100',
+            badge: 'bg-blue-100 text-blue-700',
+            chip:  'bg-blue-600 text-white shadow-md',
+            divider: 'border-blue-200'
+        };
+        case '交通資訊': return {
+            card:  'bg-green-50 border-green-100',
+            badge: 'bg-green-100 text-green-700',
+            chip:  'bg-green-600 text-white shadow-md',
+            divider: 'border-green-200'
+        };
+        case '健康注意': return {
+            card:  'bg-orange-50 border-orange-100',
+            badge: 'bg-orange-100 text-orange-700',
+            chip:  'bg-orange-500 text-white shadow-md',
+            divider: 'border-orange-200'
+        };
+        default: return {
+            card:  'bg-gray-50 border-gray-200',
+            badge: 'bg-gray-100 text-gray-700',
+            chip:  'bg-gray-500 text-white shadow-md',
+            divider: 'border-gray-200'
+        };
+    }
+}
+
 function renderReferenceView(container) {
     const categories = ['全部', ...new Set(referenceData.map(x => x.category).filter(Boolean))];
 
