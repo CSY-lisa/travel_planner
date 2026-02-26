@@ -254,6 +254,37 @@ function _handleMessage(userId, replyToken, text, props) {
     return;
   }
 
+  if (text.startsWith('重要 ')) {
+    const input = text.slice(3).trim();
+    sendLoadingIndicator(userId, props);
+    const fields = callGemini(input, 'important', props);
+    const data = { type: 'important', fields };
+    cache.put(pendingKey, JSON.stringify(data), 600);
+    sendLineReply(replyToken, buildConfirmationText(data), props);
+    return;
+  }
+
+  if (text.startsWith('刪除重要 ')) {
+    const title = text.slice(5).trim();
+    const sheetId = props.getProperty('SHEET_ID');
+    const ss = SpreadsheetApp.openById(sheetId);
+    const sheet = getSheetByGid(ss, props.getProperty('IMPORTANT_INFO_SHEET_GID'));
+    const found = findRowByKey(sheet, { 'title': title });
+    if (!found) {
+      sendLineReply(replyToken, `查無重要資訊「${title}」，請確認標題。`, props);
+      return;
+    }
+    cache.put(pendingDelKey, JSON.stringify({
+      type: 'important',
+      rowIndex: found.rowIndex,
+      desc: title
+    }), 600);
+    sendLineReply(replyToken,
+      `⚠️ 確定要刪除重要資訊「${title}」嗎？\n確認刪除 請回覆「確認」\n取消 請回覆「取消」`,
+      props);
+    return;
+  }
+
   // ── 刪除行程 ──────────────────────────────────────────
   // Format: "刪除行程 MM/DD HH:mm" or "刪除行程 MM/DD 活動標題"
   if (text.startsWith('刪除行程 ')) {
@@ -312,7 +343,7 @@ function _handleMessage(userId, replyToken, text, props) {
 
   // 未知指令
   sendLineReply(replyToken,
-    '請用以下格式輸入：\n\n🗓 新增行程：\n行程 2026/03/07 下午 廣島 嚴島神社\n\n📝 新增補充資料：\n補充 裕示堂 廣島市威士忌酒吧\n\n🗑 刪除行程：\n刪除行程 03/07 14:00\n刪除補充 裕示堂\n\n💡 等待確認時可用「取消」取消操作',
+    '請用以下格式輸入：\n\n🗓 新增行程：\n行程 2026/03/07 下午 廣島 嚴島神社\n\n📝 新增補充資料：\n補充 裕示堂 廣島市威士忌酒吧\n\n🆘 新增重要資訊：\n重要 VJW 日本入境申報\n\n🗑 刪除：\n刪除行程 03/07 14:00\n刪除補充 裕示堂\n刪除重要 VJW\n\n💡 等待確認時可用「取消」取消操作',
     props);
 }
 
