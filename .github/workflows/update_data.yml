@@ -36,4 +36,4 @@ jobs:
         git config --global user.email 'action@github.com'
         git add --force data/travel_data.json data/reference_data.json data/exchange_rate_history.json data/important_info.json
         # Only commit if there are changes
-        git diff --quiet && git diff --staged --quiet || (git commit -m "Update travel data from Google Sheets" && git push)
+        git diff --quiet && git diff --staged --quiet || (git commit -m "Update travel data from Google Sheets" && git pull --rebase origin main && git push)
