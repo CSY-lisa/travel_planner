@@ -26,6 +26,8 @@ function checkAndWrite(data, props) {
         }
       }
       appendByHeaders(sheet, data.fields);
+      sortSheet(sheet, data.type);
+      formatSheet(sheet, data.type);
       return { action: 'appended' };
 
     } else {
@@ -44,6 +46,8 @@ function checkAndWrite(data, props) {
         }
       }
       appendByHeaders(sheet, data.fields);
+      sortSheet(sheet, data.type);
+      formatSheet(sheet, data.type);
       return { action: 'appended' };
     }
 
@@ -66,6 +70,7 @@ function overwriteRow(data, rowIndex, props) {
       : props.getProperty('REFERENCE_SHEET_GID');
     const sheet = getSheetByGid(ss, gid);
     updateByHeaders(sheet, rowIndex, data.fields);
+    formatSheet(sheet, data.type);
   } catch (err) {
     Logger.log('Sheets overwrite error: ' + err.message);
     throw new Error('SHEETS_WRITE_FAILED');

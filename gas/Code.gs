@@ -152,6 +152,7 @@ function _handleMessage(userId, replyToken, text, props) {
           : props.getProperty('REFERENCE_SHEET_GID');
         const sheet = getSheetByGid(ss, gid);
         deleteRow(sheet, delData.rowIndex);
+        formatSheet(sheet, delData.type);
         cache.remove(pendingDelKey);
         sendLineReply(replyToken, `✅ 已刪除：${delData.desc}`, props);
       } catch (err) {
