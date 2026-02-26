@@ -167,6 +167,11 @@
           <span class="text-xl">💴</span>
           <span class="text-[10px]">匯率</span>
         </button>
+        <button onclick="switchTab('important')" id="tab-important"
+          class="tab-btn flex flex-col items-center justify-center gap-0.5 flex-1 h-full text-gray-400 font-medium">
+          <span class="text-xl">🆘</span>
+          <span class="text-[10px]">旅遊資訊</span>
+        </button>
       </div>
     </nav>
 
@@ -176,6 +181,7 @@
       }
       function switchTab(tab) {
         if (tab === 'itinerary') window.location.hash = '#overview';
+        else if (tab === 'important') window.location.hash = '#important';
         else window.location.hash = '#' + tab;
       }
     </script>
