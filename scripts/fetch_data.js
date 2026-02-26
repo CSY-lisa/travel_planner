@@ -16,6 +16,8 @@ const SHEET_URL = process.env.SHEET_URL;
 const OUTPUT_PATH = path.join(__dirname, '../data/travel_data.json');
 const REFERENCE_SHEET_URL = process.env.REFERENCE_SHEET_URL;
 const REFERENCE_OUTPUT_PATH = path.join(__dirname, '../data/reference_data.json');
+const IMPORTANT_INFO_SHEET_URL = process.env.IMPORTANT_INFO_SHEET_URL;
+const IMPORTANT_INFO_OUTPUT_PATH = path.join(__dirname, '../data/important_info.json');
 
 async function syncReferenceData() {
     try {
@@ -58,6 +60,44 @@ function processReferenceData(rows) {
             description: get(row, '簡介'),
             notes: get(row, '備註')
         }));
+}
+
+function processImportantInfoData(rows) {
+    if (rows.length < 2) return [];
+    const headers = rows[0];
+    const data = rows.slice(1);
+    const idx = {};
+    headers.forEach((h, i) => idx[h] = i);
+    const get = (row, col) => {
+        const val = row[idx[col]];
+        return (val === undefined || val === null) ? '' : val.trim();
+    };
+
+    return data
+        .filter(row => get(row, 'title') !== '')
+        .map(row => ({
+            category: get(row, 'category'),
+            title: get(row, 'title'),
+            content: get(row, 'content'),
+            link: get(row, 'link')
+        }));
+}
+
+async function syncImportantInfoData() {
+    try {
+        if (!IMPORTANT_INFO_SHEET_URL) {
+            console.warn('No IMPORTANT_INFO_SHEET_URL found. Skipping.');
+            return;
+        }
+        console.log('Fetching important info data from Sheet...');
+        const rawData = await getWithRedirect(IMPORTANT_INFO_SHEET_URL);
+        const rows = parseTSV(rawData);
+        const jsonData = processImportantInfoData(rows);
+        fs.writeFileSync(IMPORTANT_INFO_OUTPUT_PATH, JSON.stringify(jsonData, null, 2));
+        console.log(`IMPORTANT INFO: ${jsonData.length} items saved.`);
+    } catch (err) {
+        console.error('Important info sync failed:', err.message);
+    }
 }
 
 async function syncExchangeRate() {
@@ -117,6 +157,7 @@ async function runSync() {
         process.exit(1);
     }
     await syncReferenceData();
+    await syncImportantInfoData();
     await syncExchangeRate();
 }
 
