@@ -184,3 +184,86 @@ function testWriteReference() {
     Logger.log(`⚠️ 已有相同資料（${result.existingDesc}），rowIndex=${result.rowIndex}`);
   }
 }
+
+// ── 格式化整張 Sheet（表頭顏色 + 依日期/類別交替底色）────────────
+function formatSheet(sheet, type) {
+  const lastRow = sheet.getLastRow();
+  const lastCol = sheet.getLastColumn();
+  if (lastRow < 1 || lastCol === 0) return;
+
+  // 表頭（第 1 列）
+  const headerBg = (type === 'travel') ? '#1F4E79' : '#1E4620';
+  const headerRange = sheet.getRange(1, 1, 1, lastCol);
+  headerRange.setBackground(headerBg);
+  headerRange.setFontColor('#FFFFFF');
+  headerRange.setFontWeight('bold');
+
+  if (lastRow < 2) return;
+
+  // 資料列交替底色（依日期 / 類別 分組）
+  const headers = sheet.getRange(1, 1, 1, lastCol).getValues()[0];
+  const groupColName = (type === 'travel') ? '日期'
+    : (type === 'important') ? 'category'
+    : '類別';
+  const groupColIdx = headers.indexOf(groupColName);
+
+  const dataValues = sheet.getRange(2, 1, lastRow - 1, lastCol).getValues();
+  const lightColor = (type === 'travel') ? '#E8F0FE' : '#E8F5E9';
+
+  let groupIdx = -1;
+  let lastGroupVal = null;
+  const colors = [];
+
+  for (let i = 0; i < dataValues.length; i++) {
+    const groupVal = groupColIdx >= 0
+      ? formatCellValue(dataValues[i][groupColIdx])
+      : String(i); // fallback: alternate every row
+    if (groupVal && groupVal !== lastGroupVal) {
+      lastGroupVal = groupVal;
+      groupIdx++;
+    }
+    const bg = (groupIdx % 2 === 0) ? '#FFFFFF' : lightColor;
+    colors.push(Array(lastCol).fill(bg));
+  }
+
+  sheet.getRange(2, 1, dataValues.length, lastCol).setBackgrounds(colors);
+}
+
+// ── 依關鍵欄位排序資料列（不含表頭）─────────────────────────────
+function sortSheet(sheet, type) {
+  const lastRow = sheet.getLastRow();
+  const lastCol = sheet.getLastColumn();
+  if (lastRow < 3 || lastCol === 0) return; // header + 至少 2 筆才需排序
+
+  const headers = sheet.getRange(1, 1, 1, lastCol).getValues()[0];
+  const dataRange = sheet.getRange(2, 1, lastRow - 1, lastCol);
+
+  if (type === 'travel') {
+    const dateCol = headers.indexOf('日期') + 1;
+    const timeCol = headers.indexOf('時間') + 1;
+    if (dateCol > 0 && timeCol > 0) {
+      dataRange.sort([
+        { column: dateCol, ascending: true },
+        { column: timeCol, ascending: true }
+      ]);
+    }
+  } else if (type === 'reference') {
+    const catCol = headers.indexOf('類別') + 1;
+    const nameCol = headers.indexOf('名稱') + 1;
+    if (catCol > 0 && nameCol > 0) {
+      dataRange.sort([
+        { column: catCol, ascending: true },
+        { column: nameCol, ascending: true }
+      ]);
+    }
+  } else if (type === 'important') {
+    const catCol = headers.indexOf('category') + 1;
+    const titleCol = headers.indexOf('title') + 1;
+    if (catCol > 0 && titleCol > 0) {
+      dataRange.sort([
+        { column: catCol, ascending: true },
+        { column: titleCol, ascending: true }
+      ]);
+    }
+  }
+}
