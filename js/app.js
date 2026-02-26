@@ -9,6 +9,9 @@ let referenceData = [];
 let referenceActiveCategory = '全部';
 let referenceSearchQuery = '';
 let referenceCityFilter = '全部';
+let importantData = [];
+let importantActiveCategory = '全部';
+let importantSearchQuery = '';
 let jpyToTwd = null; // TWD per 1 JPY, fetched live
 let exchangeRateHistory = []; // [{date, rate}] loaded from JSON
 function parseCostJPY(str) {
@@ -98,10 +101,11 @@ async function fetchLiveRate() {
 
 async function fetchData() {
     try {
-        const [travelRes, referenceRes, rateRes] = await Promise.allSettled([
+        const [travelRes, referenceRes, rateRes, importantRes] = await Promise.allSettled([
             fetch('data/travel_data.json'),
             fetch('data/reference_data.json'),
-            fetch('data/exchange_rate_history.json')
+            fetch('data/exchange_rate_history.json'),
+            fetch('data/important_info.json')
         ]);
 
         if (travelRes.status === 'fulfilled' && travelRes.value.ok) {
@@ -120,6 +124,12 @@ async function fetchData() {
             exchangeRateHistory = await rateRes.value.json();
         } else {
             console.warn('exchange_rate_history.json not found');
+        }
+
+        if (importantRes.status === 'fulfilled' && importantRes.value.ok) {
+            importantData = await importantRes.value.json();
+        } else {
+            console.warn('important_info.json not found – important page will be empty');
         }
 
         // Try live rate fetch (non-blocking — initApp runs regardless)
