@@ -149,7 +149,9 @@ function _handleMessage(userId, replyToken, text, props) {
         const ss = SpreadsheetApp.openById(sheetId);
         const gid = delData.type === 'travel'
           ? props.getProperty('TRAVEL_SHEET_GID')
-          : props.getProperty('REFERENCE_SHEET_GID');
+          : delData.type === 'important'
+            ? props.getProperty('IMPORTANT_INFO_SHEET_GID')
+            : props.getProperty('REFERENCE_SHEET_GID');
         const sheet = getSheetByGid(ss, gid);
         deleteRow(sheet, delData.rowIndex);
         try { formatSheet(sheet, delData.type); } catch (fmtErr) {
