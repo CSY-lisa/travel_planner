@@ -53,27 +53,44 @@ function sendLoadingIndicator(userId, props) {
 
 function buildConfirmationText(data) {
   const label = data.type === 'travel' ? '詳細行程' : '補充資料';
-  const header = `📋 準備寫入：${label}\n──────────────────\n`;
+  const header = '📋 準備寫入：' + label + '\n──────────────────\n';
   const footer = '──────────────────\n✅ 確認寫入　請回覆「確認」\n✏️ 需要修改　請回覆「改 [欄位名] [新內容]」';
 
-  let body = '';
-  for (const [key, value] of Object.entries(data.fields)) {
-    const v = (value || '').toString().trim();
+  var lines = [];
+  for (var key in data.fields) {
+    if (!Object.prototype.hasOwnProperty.call(data.fields, key)) continue;
+    if (key === 'alternatives') continue; // 備選路線另行顯示，不在欄位列表中
+    var value = data.fields[key];
+    var v = (value || '').toString().trim();
     if (v && v !== '-') {
       // 地圖 URL 太長，縮短顯示
-      const display = v.startsWith('https://maps.google') ? '[地圖連結已產生]' : v;
-      const line = `${key}：${display}\n`;
+      var display = v.startsWith('https://maps.google') ? '[地圖連結已產生]' : v;
+      var line = key + '：' + display + '\n';
 
       // 加上此行後超過上限 → 截斷並提示
-      if (header.length + body.length + line.length + footer.length > LINE_MSG_LIMIT) {
-        body += `…（其餘欄位已省略）\n`;
+      if (header.length + lines.join('').length + line.length + footer.length > LINE_MSG_LIMIT) {
+        lines.push('…（其餘欄位已省略）\n');
         break;
       }
-      body += line;
+      lines.push(line);
     }
   }
 
-  return header + body + footer;
+  // ── 備選路線（travel 且有 alternatives）──────────────────
+  var alts = (data.fields && data.fields.alternatives) || [];
+  if (alts.length > 0) {
+    lines.push('');
+    alts.forEach(function(alt, i) {
+      var tool = alt['交通工具'] || '-';
+      var cost = alt['交通費用(JPY)'] || '-';
+      var dur  = alt['移動時間'] || '-';
+      var pay  = alt['交通支付方式'] || '-';
+      lines.push('🔀 備選 ' + (i + 1) + '：' + tool);
+      lines.push('　費用：' + cost + ' | 時間：' + dur + ' | 支付：' + pay);
+    });
+  }
+
+  return header + lines.join('') + footer;
 }
 
 function buildSuccessText(type, props) {

@@ -25,7 +25,19 @@ function checkAndWrite(data, props) {
           };
         }
       }
-      appendByHeaders(sheet, data.fields);
+      // 提取並移除 alternatives（臨時 key，不寫入 Sheet）
+      const alternatives = data.fields.alternatives || [];
+      delete data.fields.alternatives;
+
+      if (alternatives.length > 0) {
+        const groupId = generateGroupId(date, time);
+        appendByHeaders(sheet, data.fields, groupId);
+        for (let i = 0; i < alternatives.length; i++) {
+          appendByHeaders(sheet, alternatives[i], groupId);
+        }
+      } else {
+        appendByHeaders(sheet, data.fields, '');
+      }
       sortSheet(sheet, data.type);
       formatSheet(sheet, data.type);
       applyBorders(sheet);
@@ -90,6 +102,7 @@ function overwriteRow(data, rowIndex, props) {
         ? props.getProperty('IMPORTANT_INFO_SHEET_GID')
         : props.getProperty('REFERENCE_SHEET_GID');
     const sheet = getSheetByGid(ss, gid);
+    delete data.fields.alternatives; // 不寫入 Sheet
     updateByHeaders(sheet, rowIndex, data.fields);
     if (data.type === 'travel') sortSheet(sheet, data.type);
     formatSheet(sheet, data.type);
@@ -100,15 +113,26 @@ function overwriteRow(data, rowIndex, props) {
   }
 }
 
+// ── 產生群組ID：G + mmdd + hhmm ──────────────────────────────
+// dateStr = "2026/03/07", timeStr = "09:00" → "G03070900"
+function generateGroupId(dateStr, timeStr) {
+  const parts = (dateStr || '').split('/');   // ["2026","03","07"]
+  const mmdd  = (parts[1] || '') + (parts[2] || '');
+  const hhmm  = (timeStr || '').replace(':', '');
+  if (!mmdd || !hhmm) return '';              // 日期或時間缺失時不生成 groupId
+  return 'G' + mmdd + hhmm;
+}
+
 // ── 動態 Append：讀 header 列決定欄位順序 ────────────
 // 不再寫死欄位順序，避免 Google Sheets 調整欄位時城市/其他欄跑掉
-function appendByHeaders(sheet, fields) {
+function appendByHeaders(sheet, fields, groupId) {
+  groupId = groupId || '';
   const lastCol = sheet.getLastColumn();
   if (lastCol === 0) throw new Error('Sheet 無 header 列，請先確認表格標題列');
 
   const headers = sheet.getRange(1, 1, 1, lastCol).getValues()[0];
   const row = headers.map(h => {
-    if (h === '群組ID') return ''; // 新增資料 群組ID 留空
+    if (h === '群組ID') return groupId;
     const val = fields[h];
     return (val !== undefined && val !== null) ? val : '';
   });

@@ -112,7 +112,7 @@ function _buildFieldSpec(fields) {
 }
 
 function buildTravelPrompt() {
-  return `你是廣島旅行規劃助理。使用者會給你一筆行程資料（不完整），請根據你的知識補全所有欄位，以 JSON 格式回傳。\n\n欄位規格（嚴格遵守）：\n${_buildFieldSpec(TRAVEL_FIELDS)}\n\n只回傳 JSON 物件，key 為欄位名，不要加任何說明文字。`;
+  return `你是廣島旅行規劃助理。使用者會給你一筆行程資料（不完整），請根據你的知識補全所有欄位，以 JSON 格式回傳。\n\n欄位規格（嚴格遵守）：\n${_buildFieldSpec(TRAVEL_FIELDS)}\n\n備選路線規則：\n- 若類型為「交通」且有 2–3 種實用備選路線（不同交通工具或路徑），在 JSON 中加入 "alternatives" 陣列\n- 每個備選元素只填以下 8 欄（不得加入其他欄位）：交通工具、交通支付方式、起始站、終點站、班次頻率/時刻資訊、移動時間、交通費用(JPY)、相關連結(時刻表)\n- 若無備選路線（或類型非「交通」），alternatives 填 []\n\n只回傳 JSON 物件，key 為欄位名，不要加任何說明文字。`;
 }
 
 function buildReferencePrompt() {
