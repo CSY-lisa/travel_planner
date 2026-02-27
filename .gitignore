@@ -43,3 +43,6 @@ CLAUDE.md
 .claude/skills/continuous-learning/references/*
 
 /temp/
+/doc/
+/gas/.claspignore
+/gas/appsscript.json
