@@ -53,6 +53,16 @@ function doPost(e) {
     const event = events[0];
     if (event.type !== 'message' || event.message.type !== 'text') return okResponse();
 
+    // 去重保護：同一則訊息只處理一次，防止 LINE 重試造成重複寫入
+    const msgId = event.message.id;
+    const cache = CacheService.getScriptCache();
+    const processedKey = 'msg_' + msgId;
+    if (cache.get(processedKey)) {
+      Logger.log('重複請求略過: ' + msgId);
+      return okResponse();
+    }
+    cache.put(processedKey, '1', 300); // 5 分鐘內重複請求都略過
+
     const userId = event.source.userId;
     const replyToken = event.replyToken;
     const text = event.message.text.trim();
@@ -85,6 +95,14 @@ function handleMessage(userId, replyToken, text, props) {
     Logger.log(`handleMessage error [${err.message}]: ${err.stack}`);
     sendLineReply(replyToken, userMsg, props);
   }
+}
+
+// ── 語意確認 / 取消 判斷 ────────────────────────────────
+function isConfirm(text) {
+  return /^(確認|確定|好|可以|沒問題|對|寫入|存入|y|yes|ok|yep|sure)$/i.test(text.trim());
+}
+function isCancel(text) {
+  return /^(取消|不要|不|不用|算了|放棄|cancel|n|no|nope)$/i.test(text.trim());
 }
 
 // Parse natural language modification input.
@@ -135,15 +153,25 @@ function _handleMessage(userId, replyToken, text, props) {
   const pendingDelKey = 'pending_del_' + userId;
   const pendingDelRaw = cache.get(pendingDelKey);
 
+  // ── 新指令偵測：送出新指令時，自動取消任何等待狀態 ──────
+  const NEW_COMMAND_PREFIXES = ['行程 ', '補充 ', '重要 ', '刪除行程 ', '刪除補充 '];
+  const isNewCommand = NEW_COMMAND_PREFIXES.some(p => text.startsWith(p)) ||
+    /^刪除\s*重要\s+/.test(text);
+  if (isNewCommand && (pendingRaw || pendingDelRaw)) {
+    cache.remove(pendingKey);
+    cache.remove(pendingDelKey);
+    // 清除後繼續往下，當作全新指令處理
+  }
+
   // ── 等待刪除確認 ──────────────────────────────────────
-  if (pendingDelRaw) {
+  if (!isNewCommand && pendingDelRaw) {
     const delData = JSON.parse(pendingDelRaw);
-    if (text === '取消') {
+    if (isCancel(text)) {
       cache.remove(pendingDelKey);
       sendLineReply(replyToken, '✅ 已取消，資料未刪除。', props);
       return;
     }
-    if (text === '確認') {
+    if (isConfirm(text)) {
       try {
         const sheetId = props.getProperty('SHEET_ID');
         const ss = SpreadsheetApp.openById(sheetId);
@@ -174,18 +202,41 @@ function _handleMessage(userId, replyToken, text, props) {
   }
 
   // ── 等待中狀態（已填好欄位，等用戶確認）──
-  if (pendingRaw) {
+  if (!isNewCommand && pendingRaw) {
     const data = JSON.parse(pendingRaw);
 
     // ── 取消（任何等待狀態都可取消）──
-    if (text === '取消') {
+    if (isCancel(text)) {
       cache.remove(pendingKey);
       sendLineReply(replyToken, '✅ 已取消，資料未寫入。', props);
       return;
     }
 
     // ── 確認 ──
-    if (text === '確認') {
+    // ── 多筆候選：等用戶回數字選擇 ──
+    if (data.awaitingPick) {
+      const num = parseInt(text);
+      const candidates = data.candidates || [];
+      if (!isNaN(num) && num >= 1 && num <= candidates.length) {
+        const chosen = candidates[num - 1];
+        cache.put(pendingDelKey, JSON.stringify({
+          type: 'important',
+          rowIndex: chosen.rowIndex,
+          desc: chosen.title
+        }), 600);
+        sendLineReply(replyToken,
+          `⚠️ 確定要刪除重要資訊「${chosen.title}」嗎？\n確認刪除 請回覆「確認」\n取消 請回覆「取消」`,
+          props);
+      } else {
+        const listText = candidates.map((c, i) => `${i + 1}. ${c.title}`).join('\n');
+        sendLineReply(replyToken,
+          `請回覆數字（1–${candidates.length}）選擇要刪除哪一筆：\n\n${listText}\n\n取消請回覆「取消」`,
+          props);
+      }
+      return;
+    }
+
+    if (isConfirm(text)) {
       if (data.awaitingOverwrite) {
         // 第二次確認：用戶同意覆蓋既有列
         overwriteRow(data, data.rowIndex, props);
@@ -266,23 +317,40 @@ function _handleMessage(userId, replyToken, text, props) {
     return;
   }
 
-  if (text.startsWith('刪除重要 ')) {
-    const title = text.slice(5).trim();
+  const delImportantMatch = text.match(/^刪除\s*重要\s+(.+)$/);
+  if (delImportantMatch) {
+    const query = delImportantMatch[1].trim();
     const sheetId = props.getProperty('SHEET_ID');
     const ss = SpreadsheetApp.openById(sheetId);
     const sheet = getSheetByGid(ss, props.getProperty('IMPORTANT_INFO_SHEET_GID'));
-    const found = findRowByKey(sheet, { 'title': title });
-    if (!found) {
-      sendLineReply(replyToken, `查無重要資訊「${title}」，請確認標題。`, props);
+    const candidates = findImportantFuzzy(sheet, query);
+
+    if (candidates.length === 0) {
+      sendLineReply(replyToken, `查無符合「${query}」的重要資訊，請確認內容。`, props);
       return;
     }
+
+    if (candidates.length === 1) {
+      cache.put(pendingDelKey, JSON.stringify({
+        type: 'important',
+        rowIndex: candidates[0].rowIndex,
+        desc: candidates[0].title
+      }), 600);
+      sendLineReply(replyToken,
+        `⚠️ 確定要刪除重要資訊「${candidates[0].title}」嗎？\n確認刪除 請回覆「確認」\n取消 請回覆「取消」`,
+        props);
+      return;
+    }
+
+    // 多筆相符 → 列出讓用戶選擇
+    const listText = candidates.map((c, i) => `${i + 1}. ${c.title}`).join('\n');
     cache.put(pendingDelKey, JSON.stringify({
       type: 'important',
-      rowIndex: found.rowIndex,
-      desc: title
+      awaitingPick: true,
+      candidates: candidates
     }), 600);
     sendLineReply(replyToken,
-      `⚠️ 確定要刪除重要資訊「${title}」嗎？\n確認刪除 請回覆「確認」\n取消 請回覆「取消」`,
+      `找到 ${candidates.length} 筆符合的資料，請回覆數字選擇要刪除哪一筆：\n\n${listText}\n\n取消請回覆「取消」`,
       props);
     return;
   }

@@ -61,67 +61,76 @@ function checkAndThrottle(props) {
   }
 }
 
-// ── System Prompts ────────────────────────────────────
-const TRAVEL_SYSTEM_PROMPT = `你是廣島旅行規劃助理。使用者會給你一筆行程資料（不完整），請根據你的知識補全所有欄位，以 JSON 格式回傳。
+// ── 欄位定義（維護時只改這裡）────────────────────────────────────
+// key = Google Sheets 欄位名稱，value = 格式說明（給 Gemini 的規格）
+const TRAVEL_FIELDS = {
+  '日期':             'yyyy/mm/dd',
+  '星期':             'Mon./Tue./Wed./Thu./Fri./Sat./Sun.（根據日期計算）',
+  '時段':             '早上(<12:00) / 下午(12-18) / 晚上(>18)',
+  '時間':             'HH:mm（24小時制，推測合理時間）',
+  '類型':             '交通/用餐/景點/購物/住宿',
+  '城市':             '繁體中文',
+  '活動標題':          '繁體中文',
+  '內容詳情':          '一句話描述',
+  '交通工具':          '具體路線編號（如「路面電車1號線」），無則填"-"',
+  '交通支付方式':       'Apple Pay / ICOCA / 信用卡 / 現金，無則填"-"',
+  '地點/導航':         'https://maps.google.com/maps?q=[英文地名]&t=&z=15&ie=UTF8&iwloc=&output=embed，無則填"-"',
+  '相關連結(時刻表)':   '官方URL，無則填"-"',
+  '起始站':            '繁體中文 (日文名稱)，無則填"-"',
+  '終點站':            '繁體中文 (日文名稱)，無則填"-"',
+  '班次頻率/時刻資訊':  '文字描述，無則填"-"',
+  '移動時間':          'X分 或 X.X小時，無則填"-"',
+  '交通費用(JPY)':     '¥數字（千分位），免費填¥0',
+  '景點官網':          'URL，無則填"-"',
+  '景點票價 (JPY)':    '¥數字，免費填¥0，無則填"-"',
+  '營業時間/狀態':      '如「09:00-17:00，週一休」，無則填"-"',
+  '景點簡介':          '「1. xxx; 2. xxx; 3. xxx」三點格式，無則填"-"',
+  '景點建議停留時間':   'X.X hr，無則填"-"',
+  '景點特殊狀況':      '2026年3月的特殊資訊，無則填"-"',
+};
 
-欄位規格（嚴格遵守）：
-- 日期：yyyy/mm/dd
-- 星期：Mon./Tue./Wed./Thu./Fri./Sat./Sun.（根據日期計算）
-- 時段：早上(<12:00) / 下午(12-18) / 晚上(>18)
-- 時間：HH:mm（24小時制，推測合理時間）
-- 類型：交通/用餐/景點/購物/住宿
-- 城市：繁體中文
-- 活動標題：繁體中文
-- 內容詳情：一句話描述
-- 交通工具：具體路線編號（如「路面電車1號線」），無則填"-"
-- 交通支付方式：Apple Pay / ICOCA / 信用卡 / 現金，無則填"-"
-- 地點/導航：https://maps.google.com/maps?q=[英文地名]&t=&z=15&ie=UTF8&iwloc=&output=embed，無則填"-"
-- 相關連結(時刻表)：官方URL，無則填"-"
-- 起始站：繁體中文 (日文名稱)，無則填"-"
-- 終點站：繁體中文 (日文名稱)，無則填"-"
-- 班次頻率/時刻資訊：文字描述，無則填"-"
-- 移動時間：X分 或 X.X小時，無則填"-"
-- 交通費用(JPY)：¥數字（千分位），免費填¥0
-- 景點官網：URL，無則填"-"
-- 景點票價 (JPY)：¥數字，免費填¥0，無則填"-"
-- 營業時間/狀態：如「09:00-17:00，週一休」，無則填"-"
-- 景點簡介：「1. xxx; 2. xxx; 3. xxx」三點格式，無則填"-"
-- 景點建議停留時間：X.X hr，無則填"-"
-- 景點特殊狀況：2026年3月的特殊資訊，無則填"-"
+const REFERENCE_FIELDS = {
+  '類別':     '交通/餐廳/其他',
+  '城市':     '繁體中文城市名',
+  '名稱':     '使用者提供的名稱',
+  '官網連結':  '官方URL，找不到填""',
+  '地點/導航': 'https://maps.google.com/maps?q=[城市英文]+[地點英文]&t=&z=15&ie=UTF8&iwloc=&output=embed，找不到填""',
+  '簡介':     '150字以內，說明特色、推薦原因、價位',
+  '備註':     '特殊資訊或""',
+};
 
-只回傳 JSON 物件，key 為欄位名，不要加任何說明文字。`;
+const IMPORTANT_FIELDS = {
+  'category': '緊急聯絡 / 入境手續 / 交通資訊 / 健康注意',
+  'title':    '使用者提供的標題，繁體中文',
+  'content':  '詳細說明，包含電話、地址、步驟等實用資訊（150字以內）',
+  'link':     '官方URL，找不到填""',
+};
 
-const REFERENCE_SYSTEM_PROMPT = `你是廣島旅行資料助理。使用者會給你一筆補充資料（名稱 + 其他提示），請根據你的知識補全所有欄位，以 JSON 格式回傳。
+// ── System Prompts（從欄位常數動態組出）────────────────────────
+function _buildFieldSpec(fields) {
+  return Object.entries(fields).map(([k, v]) => `- ${k}：${v}`).join('\n');
+}
 
-欄位規格：
-- 類別：交通/餐廳/其他
-- 城市：繁體中文城市名
-- 名稱：使用者提供的名稱
-- 官網連結：官方URL，找不到填""
-- 地點/導航：https://maps.google.com/maps?q=[城市英文]+[地點英文]&t=&z=15&ie=UTF8&iwloc=&output=embed，找不到填""
-- 簡介：150字以內，說明特色、推薦原因、價位
-- 備註：特殊資訊或""
+function buildTravelPrompt() {
+  return `你是廣島旅行規劃助理。使用者會給你一筆行程資料（不完整），請根據你的知識補全所有欄位，以 JSON 格式回傳。\n\n欄位規格（嚴格遵守）：\n${_buildFieldSpec(TRAVEL_FIELDS)}\n\n只回傳 JSON 物件，key 為欄位名，不要加任何說明文字。`;
+}
 
-只回傳 JSON 物件，key 為欄位名，不要加任何說明文字。`;
+function buildReferencePrompt() {
+  return `你是廣島旅行資料助理。使用者會給你一筆補充資料（名稱 + 其他提示），請根據你的知識補全所有欄位，以 JSON 格式回傳。\n\n欄位規格：\n${_buildFieldSpec(REFERENCE_FIELDS)}\n\n只回傳 JSON 物件，key 為欄位名，不要加任何說明文字。`;
+}
 
-const IMPORTANT_INFO_SYSTEM_PROMPT = `你是廣島旅行資訊助理。使用者會給你一筆重要旅遊資訊（標題 + 其他提示），請根據你的知識補全所有欄位，以 JSON 格式回傳。
-
-欄位規格：
-- category：緊急聯絡 / 入境手續 / 交通資訊 / 健康注意
-- title：使用者提供的標題，繁體中文
-- content：詳細說明，包含電話、地址、步驟等實用資訊（150字以內）
-- link：官方URL，找不到填""
-
-只回傳 JSON 物件，key 為欄位名，不要加任何說明文字。`;
+function buildImportantPrompt() {
+  return `你是廣島旅行資訊助理。使用者會給你一筆重要旅遊資訊（標題 + 其他提示），請根據你的知識補全所有欄位，以 JSON 格式回傳。\n\n欄位規格：\n${_buildFieldSpec(IMPORTANT_FIELDS)}\n\n只回傳 JSON 物件，key 為欄位名，不要加任何說明文字。`;
+}
 
 // ── 主要呼叫函式 ──────────────────────────────────────
 function callGemini(userInput, mode, props) {
   checkAndThrottle(props); // 含 LockService 保護 + 計數器更新
 
   const apiKey = props.getProperty('GEMINI_API_KEY');
-  const systemPrompt = mode === 'travel' ? TRAVEL_SYSTEM_PROMPT
-    : mode === 'important' ? IMPORTANT_INFO_SYSTEM_PROMPT
-    : REFERENCE_SYSTEM_PROMPT;
+  const systemPrompt = mode === 'travel' ? buildTravelPrompt()
+    : mode === 'important' ? buildImportantPrompt()
+    : buildReferencePrompt();
   const url = `${GEMINI_BASE_URL}${GEMINI_MODEL}:generateContent?key=${apiKey}`;
 
   const payload = {

@@ -39,7 +39,9 @@
       "Bash(cd \"/Users/lisa/Library/CloudStorage/GoogleDrive-chycl06@gmail.com/我的雲端硬碟/AI_project/csk/travel_planner\" && gh run list --limit 10 2>&1)",
       "Bash(cd \"/Users/lisa/Library/CloudStorage/GoogleDrive-chycl06@gmail.com/我的雲端硬碟/AI_project/csk/travel_planner\" && git remote get-url origin 2>&1)",
       "WebFetch(domain:github.com)",
-      "Bash(cd \"/Users/lisa/Library/CloudStorage/GoogleDrive-chycl06@gmail.com/我的雲端硬碟/AI_project/csk/travel_planner\" && git push 2>&1)"
+      "Bash(cd \"/Users/lisa/Library/CloudStorage/GoogleDrive-chycl06@gmail.com/我的雲端硬碟/AI_project/csk/travel_planner\" && git push 2>&1)",
+      "Bash(clasp:*)",
+      "Bash(rm:*)"
     ]
   }
 }

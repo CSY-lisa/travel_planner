@@ -43,6 +43,7 @@ CLAUDE.md
 .claude/skills/continuous-learning/references/*
 
 /temp/
-/doc/
+/docs/
 /gas/.claspignore
 /gas/appsscript.json
+/docs/Todo List/01-下一次代辦事項.md

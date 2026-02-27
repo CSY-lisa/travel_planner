@@ -28,6 +28,7 @@ function checkAndWrite(data, props) {
       appendByHeaders(sheet, data.fields);
       sortSheet(sheet, data.type);
       formatSheet(sheet, data.type);
+      applyBorders(sheet);
       return { action: 'appended' };
 
     } else if (data.type === 'important') {
@@ -44,8 +45,8 @@ function checkAndWrite(data, props) {
         }
       }
       appendByHeaders(sheet, data.fields);
-      sortSheet(sheet, 'important');
       formatSheet(sheet, 'important');
+      applyBorders(sheet);
       return { action: 'appended' };
 
     } else {
@@ -64,8 +65,8 @@ function checkAndWrite(data, props) {
         }
       }
       appendByHeaders(sheet, data.fields);
-      sortSheet(sheet, data.type);
       formatSheet(sheet, data.type);
+      applyBorders(sheet);
       return { action: 'appended' };
     }
 
@@ -90,8 +91,9 @@ function overwriteRow(data, rowIndex, props) {
         : props.getProperty('REFERENCE_SHEET_GID');
     const sheet = getSheetByGid(ss, gid);
     updateByHeaders(sheet, rowIndex, data.fields);
-    sortSheet(sheet, data.type);
+    if (data.type === 'travel') sortSheet(sheet, data.type);
     formatSheet(sheet, data.type);
+    applyBorders(sheet);
   } catch (err) {
     Logger.log('Sheets overwrite error: ' + err.message);
     throw new Error('SHEETS_WRITE_FAILED');
@@ -253,6 +255,45 @@ function formatSheet(sheet, type) {
   }
 
   sheet.getRange(2, 1, dataValues.length, lastCol).setBackgrounds(colors);
+}
+
+// ── 模糊查找重要資訊（子字串比對，不區分大小寫）─────────────────
+// 回傳 [{ rowIndex, title }, ...] 可能多筆
+function findImportantFuzzy(sheet, query) {
+  const lastRow = sheet.getLastRow();
+  if (lastRow < 2) return [];
+
+  const headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+  const titleIdx = headers.indexOf('title');
+  if (titleIdx === -1) return [];
+
+  const data = sheet.getRange(2, 1, lastRow - 1, sheet.getLastColumn()).getValues();
+  const rows = data
+    .map((row, i) => ({ rowIndex: i + 2, title: String(row[titleIdx] || '').trim() }))
+    .filter(r => r.title);
+
+  const q = query.toLowerCase();
+
+  // 1. 完全相符（不區分大小寫）
+  const exact = rows.filter(r => r.title.toLowerCase() === q);
+  if (exact.length > 0) return exact;
+
+  // 2. 子字串比對（標題包含查詢，或查詢包含標題）
+  return rows.filter(r => {
+    const t = r.title.toLowerCase();
+    return t.includes(q) || q.includes(t);
+  });
+}
+
+// ── 補齊整張 Sheet 的 border（含表頭與所有資料列）─────────────────
+function applyBorders(sheet) {
+  const lastRow = sheet.getLastRow();
+  const lastCol = sheet.getLastColumn();
+  if (lastRow < 1 || lastCol === 0) return;
+  sheet.getRange(1, 1, lastRow, lastCol).setBorder(
+    true, true, true, true, true, true,
+    '#000000', SpreadsheetApp.BorderStyle.SOLID_MEDIUM
+  );
 }
 
 // ── 依關鍵欄位排序資料列（不含表頭）─────────────────────────────
