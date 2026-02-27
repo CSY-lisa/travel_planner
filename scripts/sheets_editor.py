@@ -66,7 +66,7 @@ def _get_creds():
 
 
 def _get_gc():
-    return gspread.authorize(_get_creds())
+    return gspread.Client(auth=_get_creds())
 
 
 def get_sheet(sheet_type):
@@ -146,10 +146,13 @@ def update_row(sheet_type, key_fields, new_fields):
     if row_idx is None:
         raise ValueError(f'Row not found matching {key_fields}')
 
+    unknown_new = [k for k in new_fields if k not in headers]
+    if unknown_new:
+        raise ValueError(f'Unknown field(s) in new_fields: {unknown_new}. Available: {headers}')
+
     existing = list(data[row_idx - 1])
     for field, value in new_fields.items():
-        if field in headers:
-            existing[headers.index(field)] = value
+        existing[headers.index(field)] = value
 
     ws.update(f'A{row_idx}', [existing], value_input_option='USER_ENTERED')
     format_sheet(sheet_type)
@@ -240,9 +243,9 @@ def sort_sheet(sheet_type):
     if key_indices:
         rows.sort(key=lambda r: tuple(r[i] if i < len(r) else '' for i in key_indices))
 
-    # Clear data area and rewrite sorted rows
+    # Clear data area and rewrite sorted rows (use large constant to cover all existing rows)
     total = len(rows)
-    ws.batch_clear([f'A2:ZZ{total + 1}'])
+    ws.batch_clear(['A2:ZZ10000'])
     if rows:
         ws.update('A2', rows, value_input_option='USER_ENTERED')
     print(f'  ↳ sorted {total} rows in {sheet_type}')
