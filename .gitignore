@@ -7,6 +7,9 @@ yarn-error.log
 
 # Environment variables (DO NOT REMOVE)
 .env
+
+# clasp (contains Script ID, do not commit)
+gas/.clasp.json
 .env.local
 .env.production
 .env.development

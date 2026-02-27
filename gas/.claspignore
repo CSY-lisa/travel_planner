@@ -1,0 +1,4 @@
+# clasp 只推送 .gs 和 appsscript.json，忽略其他
+**/**
+!*.gs
+!appsscript.json
