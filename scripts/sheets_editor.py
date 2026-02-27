@@ -23,7 +23,7 @@ import gspread
 from google.oauth2.service_account import Credentials
 from googleapiclient.discovery import build
 
-load_dotenv()
+load_dotenv(os.path.expanduser('~/.config/travel_planner/.env'))
 
 SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
 

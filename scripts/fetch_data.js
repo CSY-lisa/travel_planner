@@ -1,7 +1,7 @@
 const https = require('https');
 const fs = require('fs');
 const path = require('path');
-require('dotenv').config({ path: path.join(__dirname, '../.env') });
+require('dotenv').config({ path: require('os').homedir() + '/.config/travel_planner/.env' });
 
 // Validate required env vars — fail fast if missing
 const REQUIRED_ENV = ['SHEET_URL'];
