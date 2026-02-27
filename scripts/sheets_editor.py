@@ -17,7 +17,6 @@ sheet_type: 'travel' | 'reference' | 'important'
 """
 
 import os
-import json
 from dotenv import load_dotenv
 
 import gspread
@@ -133,13 +132,13 @@ def update_row(sheet_type, key_fields, new_fields):
         raise ValueError(f'{sheet_type} sheet has no data rows')
     headers = data[0]
 
+    unknown_keys = [k for k in key_fields if k not in headers]
+    if unknown_keys:
+        raise ValueError(f'Unknown key column(s) in update_row: {unknown_keys}. Available: {headers}')
+
     row_idx = None
     for i, row in enumerate(data[1:], start=2):
-        match = all(
-            (headers.index(k) < len(row) and row[headers.index(k)] == v)
-            for k, v in key_fields.items()
-            if k in headers
-        )
+        match = all(row[headers.index(k)] == v for k, v in key_fields.items())
         if match:
             row_idx = i
             break
@@ -169,13 +168,13 @@ def delete_row(sheet_type, key_fields):
         raise ValueError(f'{sheet_type} sheet has no data rows')
     headers = data[0]
 
+    unknown_keys = [k for k in key_fields if k not in headers]
+    if unknown_keys:
+        raise ValueError(f'Unknown key column(s) in delete_row: {unknown_keys}. Available: {headers}')
+
     row_idx = None
     for i, row in enumerate(data[1:], start=2):
-        match = all(
-            (headers.index(k) < len(row) and row[headers.index(k)] == v)
-            for k, v in key_fields.items()
-            if k in headers
-        )
+        match = all(row[headers.index(k)] == v for k, v in key_fields.items())
         if match:
             row_idx = i
             break
