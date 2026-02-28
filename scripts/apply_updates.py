@@ -175,7 +175,141 @@ def _build_format_requests(ws_id, headers, rows, sheet_type):
 # ── Modes (stubs — implemented in Tasks 5–8) ─────────────────────────────────
 
 def do_surgical_update(pending, dry_run=False):
-    raise NotImplementedError('Task 5')
+    """Apply only specified operations. Untouched rows are never modified."""
+    sheet_type = pending.get('sheet_type', 'travel')
+    operations = pending.get('operations', [])
+
+    ws, service, sheet_id = _connect(sheet_type)
+    # Call 1: Read
+    data = ws.get_all_values()
+    if not data:
+        print('❌ Sheet is empty')
+        return
+    headers = data[0]
+    rows = [list(r) for r in data[1:]]  # mutable copies
+
+    def find_row(key_fields):
+        for i, row in enumerate(rows):
+            if all(
+                (row[headers.index(k)] if headers.index(k) < len(row) else '') == v
+                for k, v in key_fields.items()
+                if k in headers
+            ):
+                return i
+        return None
+
+    # Process operations in memory
+    delete_indices = set()
+    update_ops = []
+    append_rows = []
+
+    for op in operations:
+        kind = op.get('op')
+
+        if kind == 'update':
+            idx = find_row(op['key'])
+            if idx is None:
+                print(f'⚠️  Row not found for update: {op["key"]}')
+                continue
+            for field, val in op['fields'].items():
+                if field in headers:
+                    rows[idx][headers.index(field)] = val
+            update_ops.append(idx)
+
+        elif kind == 'add':
+            new_row = [op['fields'].get(h, '') for h in headers]
+            append_rows.append(new_row)
+
+        elif kind == 'delete':
+            idx = find_row(op['key'])
+            if idx is None:
+                print(f'⚠️  Row not found for delete: {op["key"]}')
+                continue
+            delete_indices.add(idx)
+
+        elif kind == 'replace_day':
+            date_str = op['date']
+            if '日期' not in headers:
+                raise ValueError("Sheet missing '日期' column")
+            date_idx = headers.index('日期')
+            for i, row in enumerate(rows):
+                if (row[date_idx] if date_idx < len(row) else '') == date_str:
+                    delete_indices.add(i)
+            for fields in op.get('rows', []):
+                append_rows.append([fields.get(h, '') for h in headers])
+
+    if dry_run:
+        print(f'[dry-run] Would update {len(update_ops)} rows, delete {len(delete_indices)}, add {len(append_rows)}')
+        return
+
+    # Build batchUpdate requests
+    requests = []
+    ws_id = ws.id
+
+    # Delete rows (reverse order to avoid index shift)
+    for idx in sorted(delete_indices, reverse=True):
+        sheet_row = idx + 1  # 0-indexed data → 1-indexed (skip header)
+        requests.append({
+            'deleteDimension': {
+                'range': {
+                    'sheetId': ws_id,
+                    'dimension': 'ROWS',
+                    'startIndex': sheet_row,
+                    'endIndex': sheet_row + 1,
+                }
+            }
+        })
+
+    # Update specific rows
+    for idx in update_ops:
+        if idx in delete_indices:
+            continue
+        sheet_row = idx + 1
+        row_values = [{'userEnteredValue': {'stringValue': str(v)}} for v in rows[idx]]
+        requests.append({
+            'updateCells': {
+                'range': {
+                    'sheetId': ws_id,
+                    'startRowIndex': sheet_row,
+                    'endRowIndex': sheet_row + 1,
+                    'startColumnIndex': 0,
+                    'endColumnIndex': len(rows[idx]),
+                },
+                'rows': [{'values': row_values}],
+                'fields': 'userEnteredValue',
+            }
+        })
+
+    # Append new rows
+    if append_rows:
+        append_row_data = []
+        for row in append_rows:
+            append_row_data.append({
+                'values': [{'userEnteredValue': {'stringValue': str(v)}} for v in row]
+            })
+        requests.append({
+            'appendCells': {
+                'sheetId': ws_id,
+                'rows': append_row_data,
+                'fields': 'userEnteredValue',
+            }
+        })
+
+    if not requests:
+        print('ℹ️  No changes to apply')
+        return
+
+    # Call 2: Write (all operations in one batchUpdate)
+    service.spreadsheets().batchUpdate(
+        spreadsheetId=sheet_id,
+        body={'requests': requests}
+    ).execute()
+
+    print(f'✅ Applied: {len(update_ops)} updated, {len(delete_indices)} deleted, {len(append_rows)} added')
+    print(f'   2 API calls total')
+
+    # Archive pending file
+    PENDING_FILE.rename(PENDING_FILE.with_suffix('.applied.json'))
 
 
 def do_full_rewrite_with_sort(pending, dry_run=False):

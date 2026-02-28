@@ -47,6 +47,7 @@ CLAUDE.md
 .claude/skills/continuous-learning/references/*
 
 /backups/latest.json
+/data/pending_updates.applied.json
 /temp/
 /docs/
 /gas/.claspignore
