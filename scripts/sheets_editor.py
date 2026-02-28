@@ -211,13 +211,16 @@ def replace_day(date_str, new_rows_list):
     Args:
         date_str: e.g. '2026/03/07'
         new_rows_list: list of dicts, each dict = one row's fields
+               e.g. [{'日期': '2026/03/07', '時間': '09:00', ...}, ...]
     """
     ws = get_sheet('travel')
     data = ws.get_all_values()
     if not data:
         raise ValueError('Travel sheet is empty')
     headers = data[0]
-    date_idx = headers.index('日期') if '日期' in headers else 0
+    if '日期' not in headers:
+        raise ValueError("Travel sheet missing '日期' column")
+    date_idx = headers.index('日期')
 
     # Filter out rows for this date in memory
     kept_rows = [row for row in data[1:] if row[date_idx] != date_str]
