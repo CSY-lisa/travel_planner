@@ -25,6 +25,11 @@ from googleapiclient.discovery import build
 
 load_dotenv(os.path.expanduser('~/.config/travel_planner/.env'))
 
+# Module-level connection cache — one connection per script run
+_gc_cache = None
+_ss_cache = None
+_ws_cache = {}
+
 SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
 
 GID_KEYS = {
@@ -66,23 +71,32 @@ def _get_creds():
 
 
 def _get_gc():
-    return gspread.Client(auth=_get_creds())
+    global _gc_cache
+    if _gc_cache is None:
+        _gc_cache = gspread.Client(auth=_get_creds())
+    return _gc_cache
 
 
 def get_sheet(sheet_type):
-    """Return the gspread Worksheet for the given sheet_type."""
+    """Return cached gspread Worksheet for the given sheet_type."""
     if sheet_type not in GID_KEYS:
         raise ValueError(f'Unknown sheet_type: {sheet_type}. Use: travel, reference, important')
+    if sheet_type in _ws_cache:
+        return _ws_cache[sheet_type]
+
+    global _ss_cache
     gc = _get_gc()
     sheet_id = os.getenv('SHEET_ID')
     if not sheet_id:
         raise ValueError('SHEET_ID not set in .env')
-    ss = gc.open_by_key(sheet_id)
+    if _ss_cache is None:
+        _ss_cache = gc.open_by_key(sheet_id)
     gid = os.getenv(GID_KEYS[sheet_type])
     if not gid:
         raise ValueError(f'{GID_KEYS[sheet_type]} not set in .env')
-    for ws in ss.worksheets():
+    for ws in _ss_cache.worksheets():
         if str(ws.id) == gid:
+            _ws_cache[sheet_type] = ws
             return ws
     raise ValueError(f'Sheet tab not found for GID={gid}')
 
