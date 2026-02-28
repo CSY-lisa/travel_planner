@@ -207,10 +207,10 @@ def delete_row(sheet_type, key_fields):
 def replace_day(date_str, new_rows_list):
     """Delete all Travel rows for date_str and insert new_rows_list.
 
+    Uses in-memory filtering + single rewrite instead of row-by-row delete.
     Args:
         date_str: e.g. '2026/03/07'
         new_rows_list: list of dicts, each dict = one row's fields
-                       e.g. [{'日期': '2026/03/07', '時間': '09:00', ...}, ...]
     """
     ws = get_sheet('travel')
     data = ws.get_all_values()
@@ -219,27 +219,25 @@ def replace_day(date_str, new_rows_list):
     headers = data[0]
     date_idx = headers.index('日期') if '日期' in headers else 0
 
-    # Collect row indices (1-indexed) for this date, bottom-up
-    rows_to_delete = [
-        i + 2
-        for i, row in enumerate(data[1:])
-        if row[date_idx] == date_str
-    ]
+    # Filter out rows for this date in memory
+    kept_rows = [row for row in data[1:] if row[date_idx] != date_str]
+    removed_count = len(data[1:]) - len(kept_rows)
 
-    for row_idx in reversed(rows_to_delete):
-        ws.delete_rows(row_idx)
+    # Build new rows
+    new_raw = []
+    for fields in new_rows_list:
+        new_raw.append([fields.get(h, '') for h in headers])
 
-    # Append new rows
-    if new_rows_list:
-        to_append = []
-        for fields in new_rows_list:
-            row = [fields.get(h, '') for h in headers]
-            to_append.append(row)
-        ws.append_rows(to_append, value_input_option='USER_ENTERED')
+    all_rows = kept_rows + new_raw
+
+    # Single clear + rewrite (2 API calls total for this operation)
+    ws.batch_clear(['A2:ZZ10000'])
+    if all_rows:
+        ws.update('A2', all_rows, value_input_option='USER_ENTERED')
 
     sort_sheet('travel')
     format_sheet('travel')
-    print(f'✅ Replaced {len(rows_to_delete)} rows for {date_str} → {len(new_rows_list)} new rows')
+    print(f'✅ Replaced {removed_count} rows for {date_str} → {len(new_rows_list)} new rows')
 
 
 def sort_sheet(sheet_type):
