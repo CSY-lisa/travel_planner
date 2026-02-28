@@ -314,7 +314,115 @@ def do_surgical_update(pending, dry_run=False):
 
 
 def do_full_rewrite_with_sort(pending, dry_run=False):
-    raise NotImplementedError('Task 6')
+    """Full table rewrite with sort. Saves backup first."""
+    sheet_type = pending.get('sheet_type', 'travel')
+    operations = pending.get('operations', [])
+
+    ws, service, sheet_id = _connect(sheet_type)
+    # Call 1: Read
+    data = ws.get_all_values()
+    if not data:
+        print('❌ Sheet is empty')
+        return
+    headers = data[0]
+    rows = [list(r) for r in data[1:]]
+
+    # Save backup before any write
+    if not dry_run:
+        _save_backup(data)
+
+    # Apply all operations in memory (same logic as surgical)
+    def find_row(key_fields):
+        for i, row in enumerate(rows):
+            if all(
+                (row[headers.index(k)] if headers.index(k) < len(row) else '') == v
+                for k, v in key_fields.items()
+                if k in headers
+            ):
+                return i
+        return None
+
+    rows_to_delete = set()
+    for op in operations:
+        kind = op.get('op')
+        if kind == 'update':
+            idx = find_row(op['key'])
+            if idx is not None:
+                for field, val in op['fields'].items():
+                    if field in headers:
+                        rows[idx][headers.index(field)] = val
+        elif kind == 'add':
+            rows.append([op['fields'].get(h, '') for h in headers])
+        elif kind == 'delete':
+            idx = find_row(op['key'])
+            if idx is not None:
+                rows_to_delete.add(idx)
+        elif kind == 'replace_day':
+            date_str = op['date']
+            date_idx = headers.index('日期') if '日期' in headers else 0
+            for i, row in enumerate(rows):
+                if (row[date_idx] if date_idx < len(row) else '') == date_str:
+                    rows_to_delete.add(i)
+            for fields in op.get('rows', []):
+                rows.append([fields.get(h, '') for h in headers])
+
+    rows = [r for i, r in enumerate(rows) if i not in rows_to_delete]
+
+    # Sort
+    rows = _sort_rows(rows, headers, sheet_type)
+
+    if dry_run:
+        print(f'[dry-run] Would rewrite {len(rows)} rows (sorted)')
+        return
+
+    ws_id = ws.id
+    current_row_count = len(data)  # includes header
+
+    # Build single batchUpdate: delete old data rows + append new sorted rows + format
+    requests = []
+
+    # Delete all existing data rows (keep header at index 0)
+    if current_row_count > 1:
+        requests.append({
+            'deleteDimension': {
+                'range': {
+                    'sheetId': ws_id,
+                    'dimension': 'ROWS',
+                    'startIndex': 1,
+                    'endIndex': current_row_count,
+                }
+            }
+        })
+
+    # Append sorted rows (values only)
+    if rows:
+        append_row_data = []
+        for row in rows:
+            append_row_data.append({
+                'values': [{'userEnteredValue': {'stringValue': str(v)}} for v in row]
+            })
+        requests.append({
+            'appendCells': {
+                'sheetId': ws_id,
+                'rows': append_row_data,
+                'fields': 'userEnteredValue',
+            }
+        })
+
+    # Formatting (header + alternating rows)
+    requests.extend(_build_format_requests(ws_id, headers, rows, sheet_type))
+
+    # Call 2: Write everything (data + format) in one batchUpdate
+    service.spreadsheets().batchUpdate(
+        spreadsheetId=sheet_id,
+        body={'requests': requests}
+    ).execute()
+
+    print(f'✅ Full rewrite: {len(rows)} rows sorted by {SORT_KEYS[sheet_type]}')
+    print(f'   2 API calls total')
+
+    # Archive pending file
+    PENDING_FILE.rename(PENDING_FILE.with_suffix('.applied.json'))
 
 
 def do_restore(backup_path):
