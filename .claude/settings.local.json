@@ -48,7 +48,18 @@
       "Bash(git pull:*)",
       "Bash(git:*)",
       "WebFetch(domain:lazyjapan.com)",
-      "WebFetch(domain:shinkansenkenkyu.com)"
+      "WebFetch(domain:shinkansenkenkyu.com)",
+      "WebFetch(domain:japantravel.navitime.com)",
+      "WebFetch(domain:smart-ex.jp)",
+      "WebFetch(domain:timetables.jreast.co.jp)",
+      "WebFetch(domain:www.nishitetsu.jp)",
+      "WebFetch(domain:www.nishitetsu.co.jp)",
+      "WebFetch(domain:travel.watch.impress.co.jp)",
+      "WebFetch(domain:www.dazaifutenmangu.or.jp)",
+      "WebFetch(domain:kyushujourney.com)",
+      "WebFetch(domain:www.jorudan.co.jp)",
+      "WebFetch(domain:www.jr-odekake.net)",
+      "WebFetch(domain:eki.jr-odekake.net)"
     ]
   }
 }
