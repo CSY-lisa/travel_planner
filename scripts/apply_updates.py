@@ -200,7 +200,7 @@ def do_surgical_update(pending, dry_run=False):
 
     # Process operations in memory
     delete_indices = set()
-    update_ops = []
+    update_ops = {}  # idx → True (deduplicated)
     append_rows = []
 
     for op in operations:
@@ -214,7 +214,7 @@ def do_surgical_update(pending, dry_run=False):
             for field, val in op['fields'].items():
                 if field in headers:
                     rows[idx][headers.index(field)] = val
-            update_ops.append(idx)
+            update_ops[idx] = True
 
         elif kind == 'add':
             new_row = [op['fields'].get(h, '') for h in headers]
@@ -246,21 +246,7 @@ def do_surgical_update(pending, dry_run=False):
     requests = []
     ws_id = ws.id
 
-    # Delete rows (reverse order to avoid index shift)
-    for idx in sorted(delete_indices, reverse=True):
-        sheet_row = idx + 1  # 0-indexed data → 1-indexed (skip header)
-        requests.append({
-            'deleteDimension': {
-                'range': {
-                    'sheetId': ws_id,
-                    'dimension': 'ROWS',
-                    'startIndex': sheet_row,
-                    'endIndex': sheet_row + 1,
-                }
-            }
-        })
-
-    # Update specific rows
+    # Update specific rows (must come before deletes to keep row indices stable)
     for idx in update_ops:
         if idx in delete_indices:
             continue
@@ -277,6 +263,20 @@ def do_surgical_update(pending, dry_run=False):
                 },
                 'rows': [{'values': row_values}],
                 'fields': 'userEnteredValue',
+            }
+        })
+
+    # Delete rows (reverse order to avoid index shift)
+    for idx in sorted(delete_indices, reverse=True):
+        sheet_row = idx + 1  # 0-indexed data → 1-indexed (skip header)
+        requests.append({
+            'deleteDimension': {
+                'range': {
+                    'sheetId': ws_id,
+                    'dimension': 'ROWS',
+                    'startIndex': sheet_row,
+                    'endIndex': sheet_row + 1,
+                }
             }
         })
 
