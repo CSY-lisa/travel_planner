@@ -74,37 +74,37 @@
   {
     "category": "其他",
     "city": "廣島市",
-    "name": "L.L.Bean 廣島府中店",
-    "website": "https://www.llbean.co.jp/",
-    "mapUrl": "https://maps.google.com/maps?q=Hiroshima+LLBean+Fuchu&t=&z=15&ie=UTF8&iwloc=&output=embed",
-    "description": "位於 AEON MALL 廣島府中店內，是美國知名戶外品牌。店內提供各式戶外服飾、經典帆布托特包及露營裝備。商品以耐用度及美式休閒風格聞名，價位屬於中高階。適合喜愛戶外運動與美式風格的旅客在此選購高品質商品。",
-    "notes": "位於購物中心內，停車方便且通常可享免稅服務。"
-  },
-  {
-    "category": "其他",
-    "city": "廣島市",
-    "name": "L.L.Bean 廣島福屋站前店",
-    "website": "https://www.llbean.co.jp/",
-    "mapUrl": "https://maps.google.com/maps?q=Hiroshima+LLBean+Fukuya&t=&z=15&ie=UTF8&iwloc=&output=embed",
-    "description": "位於廣島站前福屋百貨內的美國知名戶外品牌分店。提供高品質的戶外服飾、裝備以及經典的托特包與獵鴨靴。店內風格簡約耐用，適合喜愛休閒戶外風格的旅客前來選購，價位中等至高，以其優良售後服務與品質聞名。",
-    "notes": "位於福屋廣島站前店（Yale Yale A-kan）內"
-  },
-  {
-    "category": "其他",
-    "city": "廣島市",
-    "name": "L.L.Bean 廣島 ALPARK 店",
-    "website": "https://www.llbean.co.jp/",
-    "mapUrl": "https://maps.google.com/maps?q=Hiroshima+LLBean+ALPARK&t=&z=15&ie=UTF8&iwloc=&output=embed",
-    "description": "位於廣島市西區 ALPARK 購物中心內的美國經典戶外品牌分店。該店提供高品質的戶外服飾、裝備以及最具代表性的獵鴨靴與帆布托特包。店內環境寬敞且商品齊全，是戶外活動愛好者或尋找耐用日常休閒服飾旅客的理想購物選擇。",
-    "notes": "提供免稅服務，位於 ALPARK 東棟。"
-  },
-  {
-    "category": "其他",
-    "city": "廣島市",
     "name": "L.L.Bean 廣島福屋店",
     "website": "https://www.llbean.co.jp/",
     "mapUrl": "https://maps.google.com/maps?q=Hiroshima+LL+Bean+Fukuya&t=&z=15&ie=UTF8&iwloc=&output=embed",
     "description": "L.L.Bean 是來自美國的知名戶外用品品牌，其廣島分店位於福屋百貨內。品牌以耐用的戶外服飾、經典的獵鴨靴與托特包聞名。店內提供豐富的戶外運動與休閒穿搭選擇，價位中等且品質優良，深受喜愛美式戶外風格的消費者喜愛。",
     "notes": "位於福屋廣島站前店 (Fukuya Hiroshima-eki-mae store) 內"
+  },
+  {
+    "category": "餐廳",
+    "city": "廣島",
+    "name": "伊都岐咖啡 伊都岐珈琲(自家焙煎コ-ヒ-)",
+    "website": "https://itsuki-miyajima.com/",
+    "mapUrl": "https://maps.google.com/maps?q=Hatsukaichi+Itsuki+Coffee&t=&z=15&ie=UTF8&iwloc=&output=embed",
+    "description": "位於宮島的知名自家烘焙咖啡店。店內裝潢簡約文青，提供高品質手沖咖啡與高品質自家烘焙豆。氛圍安靜優雅，非常適合在參拜嚴島神社後在此稍作休息，品味香醇咖啡。價位約 500-1,000 日圓。",
+    "notes": "除了高品質咖啡，店內也販售掛耳包與咖啡豆，適合作為伴手禮。"
+  },
+  {
+    "category": "餐廳",
+    "city": "廣島",
+    "name": "廣島山德餐廳 (Sante / 山徳)",
+    "website": "https://www.hiroshima-sante.com/",
+    "mapUrl": "https://maps.google.com/maps?q=Hiroshima+Sante&t=&z=15&ie=UTF8&iwloc=&output=embed",
+    "description": "創業於大正時代的老字號名店，以招牌料理「山德炸物（山徳揚げ）」聞名，其特點是將碎肉與洋蔥混合後炸至外皮酥脆且香氣撲鼻。店內氛圍懷舊，提供豐富的日式定食與下酒菜，是廣島在地人非常喜愛的平價美食。午餐定食約 1,000 日圓，晚餐消費約 2,000-4,000 日圓。",
+    "notes": "推薦必點招牌山德炸物，部分餐點提供外帶服務。"
+  },
+  {
+    "category": "交通",
+    "city": "廣島",
+    "name": "JR 西日本鐵路周遊券",
+    "website": "https://www.westjr.co.jp/travel-information/tc/tickets-passes/jrwest-rail-pass/",
+    "mapUrl": "https://maps.google.com/maps?q=Hiroshima+Station&t=&z=15&ie=UTF8&iwloc=&output=embed",
+    "description": "JR西日本推出的外國遊客專用周遊券，包含廣島地區。可無限次搭乘範圍內的山陽新幹線、特急、普通列車及指定JR巴士。推薦給計劃跨城市旅行的遊客，如從關西、博多或岡山往返廣島，是節省交通開支的高CP值首選。",
+    "notes": "需出示護照購買，建議出發前於官網或旅行社購買，抵達後於車站綠色窗口或指定自動售票機兌換。"
   }
 ]
