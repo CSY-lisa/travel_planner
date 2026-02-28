@@ -200,7 +200,7 @@ def do_surgical_update(pending, dry_run=False):
 
     # Process operations in memory
     delete_indices = set()
-    update_ops = {}  # idx → True (deduplicated)
+    update_ops = set()  # deduplicated row indices
     append_rows = []
 
     for op in operations:
@@ -214,7 +214,7 @@ def do_surgical_update(pending, dry_run=False):
             for field, val in op['fields'].items():
                 if field in headers:
                     rows[idx][headers.index(field)] = val
-            update_ops[idx] = True
+            update_ops.add(idx)
 
         elif kind == 'add':
             new_row = [op['fields'].get(h, '') for h in headers]
@@ -246,6 +246,7 @@ def do_surgical_update(pending, dry_run=False):
     requests = []
     ws_id = ws.id
 
+    # update_ops is a deduplicated set of row indices to rewrite
     # Update specific rows (must come before deletes to keep row indices stable)
     for idx in update_ops:
         if idx in delete_indices:
