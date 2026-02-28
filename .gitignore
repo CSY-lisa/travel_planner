@@ -46,6 +46,7 @@ CLAUDE.md
 # docs/plans
 .claude/skills/continuous-learning/references/*
 
+/backups/latest.json
 /temp/
 /docs/
 /gas/.claspignore
