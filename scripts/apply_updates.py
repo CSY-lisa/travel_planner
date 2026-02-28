@@ -426,7 +426,72 @@ def do_full_rewrite_with_sort(pending, dry_run=False):
 
 
 def do_restore(backup_path):
-    raise NotImplementedError('Task 7')
+    """Restore sheet from local backup JSON."""
+    path = Path(backup_path)
+    if not path.exists():
+        print(f'❌ Backup file not found: {backup_path}')
+        sys.exit(1)
+
+    with open(path, encoding='utf-8') as f:
+        backup = json.load(f)
+
+    saved_at = backup.get('saved_at', 'unknown')
+    data = backup.get('data', [])
+    if not data:
+        print('❌ Backup is empty')
+        sys.exit(1)
+
+    headers = data[0]
+    # Infer sheet_type from first column header
+    sheet_type = 'travel'  # default; backup could store this
+
+    print(f'Restoring {len(data)-1} rows from backup saved at {saved_at}...')
+
+    ws, service, sheet_id = _connect(sheet_type)
+    ws_id = ws.id
+
+    # Call 1: Read current row count
+    current = ws.get_all_values()
+    current_count = len(current)
+
+    requests = []
+
+    # Delete all existing data rows
+    if current_count > 1:
+        requests.append({
+            'deleteDimension': {
+                'range': {
+                    'sheetId': ws_id,
+                    'dimension': 'ROWS',
+                    'startIndex': 1,
+                    'endIndex': current_count,
+                }
+            }
+        })
+
+    # Append backup data rows
+    rows = data[1:]
+    if rows:
+        append_row_data = [
+            {'values': [{'userEnteredValue': {'stringValue': str(v)}} for v in row]}
+            for row in rows
+        ]
+        requests.append({
+            'appendCells': {
+                'sheetId': ws_id,
+                'rows': append_row_data,
+                'fields': 'userEnteredValue',
+            }
+        })
+
+    # Call 2: Write
+    service.spreadsheets().batchUpdate(
+        spreadsheetId=sheet_id,
+        body={'requests': requests}
+    ).execute()
+
+    print(f'✅ Restored {len(rows)} rows from {backup_path}')
+    print(f'   2 API calls total')
 
 
 # ── Entry point ───────────────────────────────────────────────────────────────
