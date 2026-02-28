@@ -41,7 +41,14 @@
       "WebFetch(domain:github.com)",
       "Bash(cd \"/Users/lisa/Library/CloudStorage/GoogleDrive-chycl06@gmail.com/我的雲端硬碟/AI_project/csk/travel_planner\" && git push 2>&1)",
       "Bash(clasp:*)",
-      "Bash(rm:*)"
+      "Bash(rm:*)",
+      "Bash(\"/Users/lisa/Library/CloudStorage/GoogleDrive-chycl06@gmail.com/我的雲端硬碟/AI_project/csk/travel_planner/docs/plans/2026-02-27-gemini-field-config-design.md\":*)",
+      "Bash(git fetch:*)",
+      "WebFetch(domain:api.github.com)",
+      "Bash(git pull:*)",
+      "Bash(git:*)",
+      "WebFetch(domain:lazyjapan.com)",
+      "WebFetch(domain:shinkansenkenkyu.com)"
     ]
   }
 }
