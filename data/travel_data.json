@@ -1114,7 +1114,7 @@
         "timeRange": "",
         "timeline": [
           {
-            "time": "7:51",
+            "time": "8:06",
             "type": "交通",
             "city": "廣島",
             "event": "廣島→博多 新幹線",
@@ -1133,7 +1133,7 @@
             "attractionHours": "-",
             "attractionIntro": "-",
             "attractionDuration": "-",
-            "specialNotes": "最快選擇；Nozomi 不適用 JR Pass",
+            "specialNotes": "JR Pass - 廣島山口周遊券5日適用，¥15,000 cover廣島-福岡來回",
             "transportAlternatives": [
               {
                 "transportType": "新幹線 Sakura さくら ✅ JR Pass 適用",
@@ -1142,7 +1142,7 @@
                 "end": "博多站 (博多駅)",
                 "transportFreq": "07:58→09:04",
                 "duration": "66分",
-                "cost": "¥8,890 (指定席)",
+                "cost": "¥8,570 (含指定席)",
                 "link": "https://www.westjr.co.jp/global/tc/"
               },
               {
@@ -1152,7 +1152,7 @@
                 "end": "博多站 (博多駅)",
                 "transportFreq": "視班次，約85分",
                 "duration": "85分",
-                "cost": "¥8,890 (指定席)",
+                "cost": "¥8,570 (含指定席)",
                 "link": "https://www.westjr.co.jp/global/tc/"
               }
             ]
@@ -1180,7 +1180,7 @@
             "specialNotes": "無需換車；平日較不塞車；博多駅巴士總站11號月台乘車",
             "transportAlternatives": [
               {
-                "transportType": "地鐵空港線→天神 + 西鐵天神大牟田線→二日市 + 西鐵太宰府線 ※準時可靠",
+                "transportType": "地鐵空港線-博多→天神 + 西鐵天神大牟田線→二日市 + 西鐵太宰府線 ※準時可靠",
                 "transportPayment": "ICOCA / 信用卡 / 現金",
                 "start": "博多站 (博多駅)",
                 "end": "太宰府站 (太宰府駅)",
@@ -1196,7 +1196,7 @@
                 "end": "太宰府站 (太宰府駅)",
                 "transportFreq": "JR博多→JR二日市 約15分；步行轉乘約10分；西鐵二日市→太宰府 約5分",
                 "duration": "50分",
-                "cost": "¥560（JR¥340+西鐵¥220）；持JR Pass僅需¥220",
+                "cost": "¥560（JR¥340+西鐵¥220）",
                 "link": "https://www.westjr.co.jp/global/tc/"
               }
             ]
@@ -1447,7 +1447,7 @@
             "end": "廣島站 (広島駅)",
             "transportFreq": "18:52→20:17",
             "duration": "85分",
-            "cost": "¥8,890 (指定席)",
+            "cost": "¥8,570 (含指定席)",
             "attractionWebsite": "-",
             "attractionPrice": "-",
             "attractionHours": "-",
@@ -1472,7 +1472,7 @@
                 "end": "廣島站 (広島駅)",
                 "transportFreq": "視班次，約85-100分",
                 "duration": "90分",
-                "cost": "¥8,890 (指定席)",
+                "cost": "¥8,570 (含指定席)",
                 "link": "https://www.westjr.co.jp/global/tc/"
               }
             ]
