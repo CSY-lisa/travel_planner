@@ -102,7 +102,7 @@ function isConfirm(text) {
   return /^(確認|確定|好|可以|沒問題|對|寫入|存入|y|yes|ok|yep|sure)$/i.test(text.trim());
 }
 function isCancel(text) {
-  return /^(取消|不要|不|不用|算了|放棄|cancel|n|no|nope)$/i.test(text.trim());
+  return /^(取消|不要|不|不用|算了|放棄|cancel|stop|n|no|nope)$/i.test(text.trim());
 }
 
 // Parse natural language modification input.
@@ -126,6 +126,13 @@ function parseModification(text) {
     const m = text.match(re);
     if (m) return { rawField: m[1].trim(), value: m[2].trim() };
   }
+  return null;
+}
+
+// ── 偵測是否為「內容全錯，重新產生」的自然語言 ──
+function parseFullRetry(text) {
+  const match = text.match(/^(?:內容全錯|資料全錯|全錯|全部錯|都不對|重來)[，, ]*(?:改|改成|換成|改為|去|吃|重新|幫我)?\s*(.+)$/i);
+  if (match) return match[1].trim();
   return null;
 }
 
@@ -259,6 +266,19 @@ function _handleMessage(userId, replyToken, text, props) {
             props);
         }
       }
+      return;
+    }
+
+    // ── 全錯重來（放棄當前資料，直接重新呼叫 Gemini 產生新資料）──
+    const retryInput = parseFullRetry(text);
+    if (retryInput) {
+      sendLoadingIndicator(userId, props);
+      const fields = callGemini(retryInput, data.type, props);
+      const newData = { type: data.type, fields };
+      delete newData.awaitingOverwrite;
+      delete newData.rowIndex;
+      cache.put(pendingKey, JSON.stringify(newData), 600);
+      sendLineReply(replyToken, buildConfirmationText(newData), props);
       return;
     }
 

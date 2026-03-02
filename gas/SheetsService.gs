@@ -29,13 +29,17 @@ function checkAndWrite(data, props) {
       const alternatives = data.fields.alternatives || [];
       delete data.fields.alternatives;
 
-      if (alternatives.length > 0) {
+      // 防呆機制：只有當類型是「交通」時，才允許處理備選路線並產生多列
+      const isTransportation = data.fields['類型'] === '交通';
+
+      if (alternatives.length > 0 && isTransportation) {
         const groupId = generateGroupId(date, time);
         appendByHeaders(sheet, data.fields, groupId);
         for (let i = 0; i < alternatives.length; i++) {
           appendByHeaders(sheet, alternatives[i], groupId);
         }
       } else {
+        // 如果是一般行程（景點、餐廳、住宿等），或無法辨識類型，一律忽略備選陣列，確保只寫入單列
         appendByHeaders(sheet, data.fields, '');
       }
       sortSheet(sheet, data.type);
