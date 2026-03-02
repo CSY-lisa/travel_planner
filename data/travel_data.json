@@ -1114,11 +1114,11 @@
         "timeRange": "",
         "timeline": [
           {
-            "time": "7:51",
+            "time": "8:06",
             "type": "交通",
             "city": "廣島",
             "event": "廣島→博多 新幹線",
-            "description": "搭 Nozomi 出發前往福岡一日遊",
+            "description": "包含在廣島＋山口JR pass",
             "transportType": "新幹線 Nozomi のぞみ ※最快",
             "transportPayment": "ICOCA / 信用卡 / 現金",
             "mapUrl": "https://maps.google.com/maps?q=Hiroshima+Station&t=&z=15&ie=UTF8&iwloc=&output=embed",
@@ -1127,22 +1127,22 @@
             "end": "博多站 (博多駅)",
             "transportFreq": "07:51→08:43",
             "duration": "52分",
-            "cost": "¥9,630 (指定席)",
+            "cost": "包含在JR pass ( ¥15,000)",
             "attractionWebsite": "-",
             "attractionPrice": "-",
             "attractionHours": "-",
             "attractionIntro": "-",
             "attractionDuration": "-",
-            "specialNotes": "最快選擇；Nozomi 不適用 JR Pass",
+            "specialNotes": "JR Pass - 廣島山口周遊券5日適用，¥15,000 cover廣島-福岡來回",
             "transportAlternatives": [
               {
                 "transportType": "新幹線 Sakura さくら ✅ JR Pass 適用",
                 "transportPayment": "ICOCA / JR Pass / 信用卡",
                 "start": "廣島站 (広島駅)",
                 "end": "博多站 (博多駅)",
-                "transportFreq": "07:58→09:04",
-                "duration": "66分",
-                "cost": "¥8,890 (指定席)",
+                "transportFreq": "07:53→09:04 / 08:06→09:27單買¥8,570 (含指定席)",
+                "duration": "71分",
+                "cost": "包含在JR pass",
                 "link": "https://www.westjr.co.jp/global/tc/"
               },
               {
@@ -1150,9 +1150,9 @@
                 "transportPayment": "ICOCA / JR Pass / 信用卡",
                 "start": "廣島站 (広島駅)",
                 "end": "博多站 (博多駅)",
-                "transportFreq": "視班次，約85分",
+                "transportFreq": "07:55→09:15 買¥8,570 (含指定席)",
                 "duration": "85分",
-                "cost": "¥8,890 (指定席)",
+                "cost": "包含在JR pass",
                 "link": "https://www.westjr.co.jp/global/tc/"
               }
             ]
@@ -1180,7 +1180,7 @@
             "specialNotes": "無需換車；平日較不塞車；博多駅巴士總站11號月台乘車",
             "transportAlternatives": [
               {
-                "transportType": "地鐵空港線→天神 + 西鐵天神大牟田線→二日市 + 西鐵太宰府線 ※準時可靠",
+                "transportType": "地鐵空港線-博多→天神 + 西鐵天神大牟田線→二日市 + 西鐵太宰府線 ※準時可靠",
                 "transportPayment": "ICOCA / 信用卡 / 現金",
                 "start": "博多站 (博多駅)",
                 "end": "太宰府站 (太宰府駅)",
@@ -1196,7 +1196,7 @@
                 "end": "太宰府站 (太宰府駅)",
                 "transportFreq": "JR博多→JR二日市 約15分；步行轉乘約10分；西鐵二日市→太宰府 約5分",
                 "duration": "50分",
-                "cost": "¥560（JR¥340+西鐵¥220）；持JR Pass僅需¥220",
+                "cost": "¥560（JR¥340+西鐵¥220）",
                 "link": "https://www.westjr.co.jp/global/tc/"
               }
             ]
@@ -1438,16 +1438,16 @@
             "type": "交通",
             "city": "福岡",
             "event": "博多→廣島 新幹線",
-            "description": "搭 Sakura 返回廣島，JR Pass 適用推薦班次",
+            "description": "包含在廣島＋山口JR pass",
             "transportType": "新幹線 Sakura さくら ✅ JR Pass 適用 ※推薦",
             "transportPayment": "ICOCA / JR Pass / 信用卡",
             "mapUrl": "https://maps.google.com/maps?q=Hakata+Station+Fukuoka&t=&z=15&ie=UTF8&iwloc=&output=embed",
             "link": "https://www.westjr.co.jp/global/tc/",
             "start": "博多站 (博多駅)",
             "end": "廣島站 (広島駅)",
-            "transportFreq": "18:52→20:17",
-            "duration": "85分",
-            "cost": "¥8,890 (指定席)",
+            "transportFreq": "17:45→18:57 單買¥8,570 (含指定席)",
+            "duration": "72分",
+            "cost": "包含在JR pass",
             "attractionWebsite": "-",
             "attractionPrice": "-",
             "attractionHours": "-",
@@ -1460,9 +1460,9 @@
                 "transportPayment": "ICOCA / 信用卡 / 現金",
                 "start": "博多站 (博多駅)",
                 "end": "廣島站 (広島駅)",
-                "transportFreq": "視班次，約65分",
+                "transportFreq": "視班次，18:03-19:10 單買¥8,570 (含指定席)",
                 "duration": "65分",
-                "cost": "¥9,630 (指定席)",
+                "cost": "包含在JR pass",
                 "link": "https://www.westjr.co.jp/global/tc/"
               },
               {
@@ -1472,7 +1472,7 @@
                 "end": "廣島站 (広島駅)",
                 "transportFreq": "視班次，約85-100分",
                 "duration": "90分",
-                "cost": "¥8,890 (指定席)",
+                "cost": "包含在JR pass",
                 "link": "https://www.westjr.co.jp/global/tc/"
               }
             ]
@@ -1490,104 +1490,26 @@
         "timeRange": "",
         "timeline": [
           {
-            "time": "9:15",
-            "type": "交通",
-            "city": "廣島",
-            "event": "前往三瀧寺",
-            "description": "JR 可部線",
-            "transportType": "JR可部線 (JR Kabe Line)",
-            "transportPayment": "ICOCA / Apple Pay / 現金",
-            "mapUrl": null,
-            "link": "https://www.westjr.co.jp/global/tc/",
-            "start": "廣島站 (広島駅)",
-            "end": "三瀧站 (Mitaki Stn)",
-            "transportFreq": "20-30分一班",
-            "duration": "15分",
-            "cost": "¥200",
-            "attractionWebsite": "-",
-            "attractionPrice": "-",
-            "attractionHours": "-",
-            "attractionIntro": "-",
-            "attractionDuration": "-",
-            "specialNotes": "-"
-          },
-          {
             "time": "9:45",
             "type": "景點",
             "city": "廣島",
-            "event": "三瀧寺",
-            "description": "隱藏版森林寺廟",
-            "transportType": "步行 (Walk)",
+            "event": "自由安排",
+            "description": "1. 再次前往宮島 2. 橫川 3. 廣島港 4. 最後補貨",
+            "transportType": "視情況",
             "transportPayment": "-",
-            "mapUrl": "https://maps.google.com/maps?q=Mitaki-dera&t=&z=15&ie=UTF8&iwloc=&output=embed",
-            "link": "-",
-            "start": "三瀧站 (Mitaki Stn)",
-            "end": "-",
-            "transportFreq": "-",
-            "duration": "15分步行",
-            "cost": "¥0",
-            "attractionWebsite": "-",
-            "attractionPrice": "¥0 (自由參拜)",
-            "attractionHours": "08:00-17:30",
-            "attractionIntro": "1. 森林三座瀑布能量泉; 2. 朱紅多寶塔意境美; 3. 青苔與寂靜的秘境感。",
-            "attractionDuration": "2.0 hr",
-            "specialNotes": "正常營運 (隱藏版賞櫻名所)"
-          }
-        ]
-      },
-      {
-        "period": "下午",
-        "timeRange": "",
-        "timeline": [
-          {
-            "time": "13:30",
-            "type": "購物",
-            "city": "廣島",
-            "event": "最後補貨採購",
-            "description": "本通商店街總動員",
-            "transportType": "路面電車 7號線",
-            "transportPayment": "MOBIRY DAYS / ICOCA / Apple Pay",
-            "mapUrl": null,
-            "link": "https://www.hiroden.co.jp/",
-            "start": "橫川站 (Yokogawa Stn)",
-            "end": "本通 (Hondori)",
-            "transportFreq": "密集",
-            "duration": "20分",
-            "cost": "¥220",
-            "attractionWebsite": "-",
-            "attractionPrice": "-",
-            "attractionHours": "10:00-20:00",
-            "attractionIntro": "1. 藥妝服飾最後巡禮; 2. 補足清單內伴手禮; 3. 廣島最繁華商業中心。",
-            "attractionDuration": "4.0 hr",
-            "specialNotes": "-"
-          }
-        ]
-      },
-      {
-        "period": "晚上",
-        "timeRange": "",
-        "timeline": [
-          {
-            "time": "18:00",
-            "type": "購物",
-            "city": "廣島",
-            "event": "車站 ekie 最終補貨",
-            "description": "伴手禮專區",
-            "transportType": "路面電車 1號線",
-            "transportPayment": "MOBIRY DAYS / ICOCA / Apple Pay",
             "mapUrl": null,
             "link": "-",
-            "start": "本通 (Hondori)",
-            "end": "廣島站 (広島駅)",
-            "transportFreq": "-",
-            "duration": "20分",
-            "cost": "¥220",
-            "attractionWebsite": "https://www.ekie.jp/",
-            "attractionPrice": "-",
-            "attractionHours": "08:00-21:00",
-            "attractionIntro": "1. 廣島特色點心集結; 2. 出發前最後衝刺; 3. 紅葉饅頭口味應有盡有。",
-            "attractionDuration": "1.0 hr",
-            "specialNotes": "-"
+            "start": "",
+            "end": "",
+            "transportFreq": "",
+            "duration": "",
+            "cost": "",
+            "attractionWebsite": "",
+            "attractionPrice": "",
+            "attractionHours": "",
+            "attractionIntro": "",
+            "attractionDuration": "",
+            "specialNotes": ""
           }
         ]
       }
@@ -1605,7 +1527,7 @@
             "time": "8:00",
             "type": "交通",
             "city": "廣島",
-            "event": "前往機場",
+            "event": "前往機場（11:15am飛機）",
             "description": "利木津巴士",
             "transportType": "利木津巴士 (Limousine Bus)",
             "transportPayment": "ICOCA / 信用卡 / Apple Pay",
@@ -1613,7 +1535,7 @@
             "link": "https://www.hij.airport.jp/",
             "start": "廣島站 (広島駅)",
             "end": "廣島機場 (広島空港)",
-            "transportFreq": "-",
+            "transportFreq": "07:15 -  08:05 (10-15一班）",
             "duration": "50分",
             "cost": "¥1,500",
             "attractionWebsite": "-",

@@ -106,5 +106,14 @@
     "mapUrl": "https://maps.google.com/maps?q=Hiroshima+Station&t=&z=15&ie=UTF8&iwloc=&output=embed",
     "description": "JR西日本推出的外國遊客專用周遊券，包含廣島地區。可無限次搭乘範圍內的山陽新幹線、特急、普通列車及指定JR巴士。推薦給計劃跨城市旅行的遊客，如從關西、博多或岡山往返廣島，是節省交通開支的高CP值首選。",
     "notes": "需出示護照購買，建議出發前於官網或旅行社購買，抵達後於車站綠色窗口或指定自動售票機兌換。"
+  },
+  {
+    "category": "餐廳",
+    "city": "宮島",
+    "name": "Restaurant Otani (お食事処 おおたに)",
+    "website": "https://miyajima-ohtani.sakura.ne.jp/index.html",
+    "mapUrl": "https://maps.google.com/maps?q=Hatsukaichi+Restaurant+Otani&t=&z=15&ie=UTF8&iwloc=&output=embed",
+    "description": "位於宮島島上的道地餐廳，以鮮美的廣島牡蠣及星鰻飯（Anago-meshi）聞名。店內提供炸牡蠣、烤牡蠣等豐富的定食選擇，食材新鮮且價格親民。是遊客前往嚴島神社參拜時，品嚐在地特色料理的熱門選擇。價位約在 2,000 至 4,000 日圓不等。",
+    "notes": "通常於週四公休，建議前往前先確認官網營業時間。"
   }
 ]
