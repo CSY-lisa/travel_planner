@@ -1,7 +1,7 @@
 [
   {
     "category": "交通",
-    "city": "廣島市",
+    "city": "廣島",
     "name": "廣電 (Hiroden)",
     "website": "https://www.hiroden.co.jp/train/index.html",
     "mapUrl": null,
@@ -19,7 +19,7 @@
   },
   {
     "category": "其他",
-    "city": "廣島市",
+    "city": "廣島",
     "name": "成城石井 廣島駅店",
     "website": "https://corporate.seijoishii.com/",
     "mapUrl": "https://maps.google.com/maps?q=Hiroshima+Seijo+Ishii+Hiroshima+Station+ekie&t=&z=15&ie=UTF8&iwloc=&output=embed",
@@ -46,25 +46,25 @@
   },
   {
     "category": "餐廳",
-    "city": "廣島市",
+    "city": "廣島",
     "name": "裕示堂",
     "website": "",
-    "mapUrl": "https://maps.google.com/maps?q=廣島市+裕示堂&t=&z=15&ie=UTF8&iwloc=&output=embed",
+    "mapUrl": "https://maps.google.com/maps?q=廣島+裕示堂&t=&z=15&ie=UTF8&iwloc=&output=embed",
     "description": "這家店擁有工業風結合復古木質調的溫馨環境，被譽為大人的祕密基地。店內提供高品質手沖咖啡與各式威士忌、調酒，搭配自家製甜點與精緻下酒菜，深受當地人喜愛。消費價位在白天約 1,000 日圓以下，晚上酒吧時段約 2,000–3,000 日圓，Google 評分約 4.0 顆星以上，是行程中放鬆小酌的最佳選擇。",
     "notes": ""
   },
   {
     "category": "餐廳",
-    "city": "廣島市",
+    "city": "廣島",
     "name": "Grill Hikoboshi",
     "website": "",
-    "mapUrl": "https://maps.google.com/maps?q=廣島市+ぐりる彦星&t=&z=15&ie=UTF8&iwloc=&output=embed",
+    "mapUrl": "https://maps.google.com/maps?q=廣島+ぐりる彦星&t=&z=15&ie=UTF8&iwloc=&output=embed",
     "description": "這是一家氛圍優雅且充滿質感的西式鐵板料理餐廳，以高品質的廣島牛與新鮮海鮮聞名，被譽為隱藏在市區二樓的美味首選。 主廚現場展現精湛的鐵板燒手藝，提供從慢燉料理到精緻牛排等多樣化餐點，是享受高品質晚餐或慶祝特別時刻的理想場所。 餐廳位於廣島熱鬧的本通商圈附近，Google 評分達 4.4 顆星，以溫馨的服務與職人精神深受當地食客好評。",
     "notes": ""
   },
   {
     "category": "餐廳",
-    "city": "尾道市",
+    "city": "尾道",
     "name": "POUR coffee",
     "website": "https://www.instagram.com/pour_coffee_roasters/",
     "mapUrl": "https://maps.google.com/maps?q=Onomichi+POUR+coffee&t=&z=15&ie=UTF8&iwloc=&output=embed",
@@ -73,7 +73,7 @@
   },
   {
     "category": "其他",
-    "city": "廣島市",
+    "city": "廣島",
     "name": "L.L.Bean 廣島福屋店",
     "website": "https://www.llbean.co.jp/",
     "mapUrl": "https://maps.google.com/maps?q=Hiroshima+LL+Bean+Fukuya&t=&z=15&ie=UTF8&iwloc=&output=embed",
@@ -82,7 +82,7 @@
   },
   {
     "category": "餐廳",
-    "city": "廣島",
+    "city": "宮島",
     "name": "伊都岐咖啡 伊都岐珈琲(自家焙煎コ-ヒ-)",
     "website": "https://itsuki-miyajima.com/",
     "mapUrl": "https://maps.google.com/maps?q=Hatsukaichi+Itsuki+Coffee&t=&z=15&ie=UTF8&iwloc=&output=embed",
@@ -115,5 +115,68 @@
     "mapUrl": "https://maps.google.com/maps?q=Hatsukaichi+Restaurant+Otani&t=&z=15&ie=UTF8&iwloc=&output=embed",
     "description": "位於宮島島上的道地餐廳，以鮮美的廣島牡蠣及星鰻飯（Anago-meshi）聞名。店內提供炸牡蠣、烤牡蠣等豐富的定食選擇，食材新鮮且價格親民。是遊客前往嚴島神社參拜時，品嚐在地特色料理的熱門選擇。價位約在 2,000 至 4,000 日圓不等。",
     "notes": "通常於週四公休，建議前往前先確認官網營業時間。"
+  },
+  {
+    "category": "交通",
+    "city": "廣島",
+    "name": "利木津巴士",
+    "website": "https://www.hij.airport.jp/en/access/timetable/2.html",
+    "mapUrl": "https://maps.google.com/maps?q=Hiroshima+Airport&t=&z=15&ie=UTF8&iwloc=&output=embed",
+    "description": "廣島機場利木津巴士是連接廣島機場與廣島市中心（如廣島車站、廣島巴士中心）最主要的交通工具。單程行駛時間約 45 至 55 分鐘，成人單程票價約 1,500日圓。巴士班次銜接航班起降時間，並提供充足的行李存放空間，非常適合旅客使用。",
+    "notes": "可使用電子支付或於自動售票機購票，建議預先確認對應市區目的地的乘車月台。"
+  },
+  {
+    "category": "交通",
+    "city": "廣島",
+    "name": "廣島機場利木津巴士",
+    "website": "https://www.hij.airport.jp/en/access/timetable/2.html",
+    "mapUrl": "https://maps.google.com/maps?q=Hiroshima+Airport&t=&z=15&ie=UTF8&iwloc=&output=embed",
+    "description": "廣島機場往返廣島市區（廣島車站、巴士總站）最便捷的交通工具。單程票價約 1,450 日圓，車程約 45-55 分鐘。班次密集，車內提供大型行李存放空間，是旅客從機場進入市區的首選。支援 ICOCA、Suica 等主流交通 IC 卡支付。",
+    "notes": "乘車地點位於機場一樓出口外的巴士月台，建議預留充足時間並先確認時刻表。"
+  },
+  {
+    "category": "餐廳",
+    "city": "宮島",
+    "name": "あなごめし うえの (上野商店 烤星鰻便當)",
+    "website": "https://www.anagomeshi.com/",
+    "mapUrl": "https://maps.google.com/maps?q=Hatsukaichi+Anagomeshi+Ueno&t=&z=15&ie=UTF8&iwloc=&output=embed",
+    "description": "創立於1901年的百年老店，以「烤星鰻便當」聞名全日本。其特點在於使用特製醬汁反覆烘烤的星鰻，搭配吸收了鰻魚鮮味的炊飯。不論是店內享用現烤星鰻，或是購買冷掉後依然美味的外帶便當，其獨特的炭烤香氣與軟嫩口感皆深受遊客喜愛。價位約 2,500 - 4,000 日圓。",
+    "notes": "位於 JR 宮島口站出口附近，內用常需排隊，建議可先預訂外帶便當節省時間。"
+  },
+  {
+    "category": "餐廳",
+    "city": "宮島",
+    "name": "あなごめし うえの (上野商店) 烤星鰻便當",
+    "website": "https://www.anagomeshi.com/",
+    "mapUrl": "https://maps.google.com/maps?q=Hatsukaichi+Anagomeshi+Ueno&t=&z=15&ie=UTF8&iwloc=&output=embed",
+    "description": "創業於1901年的百年老店，是廣島最著名的星鰻飯（Anagomeshi）名店。其特徵是使用星鰻魚骨熬煮的高湯炊煮米飯，搭配獨門醬汁燒烤的星鰻，香氣撲鼻且口感綿密。這款便當在百年來深受歡迎，是造訪宮島前必吃的代表性美食。價位約在 2,500 至 3,500 日圓。",
+    "notes": "位於宮島口渡輪站附近。內用常需大排長龍，建議可購買外帶便當節省時間，冷掉後味道依然美味。"
+  },
+  {
+    "category": "餐廳",
+    "city": "宮島",
+    "name": "宮島 上野商店 烤星鰻便當 (あなごめし うえの)",
+    "website": "https://www.anagomeshi.com/",
+    "mapUrl": "https://maps.google.com/maps?q=Hatsukaichi+Anagomeshi+Ueno&t=&z=15&ie=UTF8&iwloc=&output=embed",
+    "description": "創業於明治34年的百年老店，是廣島最具代表性的星鰻飯名店。其特點在於使用特製醬汁與星鰻骨熬煮的高湯炊飯，配上炭火直烤、充滿焦香的星鰻。肉質紮實且風味深邃，是前往宮島必吃的排隊美食。價位約在2,500至3,500日圓之間。",
+    "notes": "排隊人潮極多，建議提早抵達領取整理券，或直接預訂外帶便當可節省等待時間。"
+  },
+  {
+    "category": "餐廳",
+    "city": "宮島",
+    "name": "上野商店 烤星鰻便當 (あなごめしうえの)",
+    "website": "https://www.anagomeshi.com/",
+    "mapUrl": "https://maps.google.com/maps?q=Hatsukaichi+Anagomeshi+Ueno&t=&z=15&ie=UTF8&iwloc=&output=embed",
+    "description": "創立於1901年的百年名店，位於JR宮島口站附近。以「星鰻便當」聞名，特色在於使用特製醬汁反覆翻烤的星鰻，搭配充滿鰻魚鮮味的炊飯。不論熱食或外帶冷食皆風味絕佳，是前往宮島旅遊的首選美食。價位約 2,500-3,500 日圓。",
+    "notes": "排隊人潮眾多，若需在店內用餐建議提早排隊，或購買外帶便當於宮島渡輪站附近享用。"
+  },
+  {
+    "category": "餐廳",
+    "city": "尾道",
+    "name": "Nekonotepan factory (ネコノテパン工場)",
+    "website": "http://pan.catnote.co.jp/",
+    "mapUrl": "https://maps.google.com/maps?q=Onomichi+Nekonotepan+Factory&t=&z=15&ie=UTF8&iwloc=&output=embed",
+    "description": "這是一家位於尾道山坡小徑上的超小型麵包店，店內空間狹窄到一次只能容納一名顧客。店內販售多種手工製作的麵包、司康與餅乾，以樸實且溫暖的口感著稱。充滿懷舊氛圍的店面是尾道散策必經的打卡熱點，價位平實，非常適合作為散步點心。",
+    "notes": "通常於週二、三公休，每日售完即止；店內禁止攝影，外觀攝影請注意禮節。"
   }
 ]

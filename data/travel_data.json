@@ -61,9 +61,9 @@
             "transportPayment": "ICOCA / 信用卡 / Apple Pay",
             "mapUrl": "https://maps.google.com/maps?q=Hiroshima+Station&t=&z=15&ie=UTF8&iwloc=&output=embed",
             "link": "https://www.hij.airport.jp/en/access/timetable/2.html",
-            "start": "廣島機場 (広島空港)",
+            "start": "廣島機場 (広島空港) 2號乘車月台",
             "end": "廣島站新幹線口 (広島駅新幹線口)",
-            "transportFreq": "15-20分一班。可搭班次：11:05, 11:25, 11:50",
+            "transportFreq": "15-20分一班。可搭班次：11:05, 11:25, 11:50 乘車月台1號（到bus center）/ 2號（藍色）（到廣島JR)",
             "duration": "50分",
             "cost": "¥1,500",
             "attractionWebsite": "-",
@@ -366,13 +366,7 @@
             "attractionIntro": "",
             "attractionDuration": "",
             "specialNotes": ""
-          }
-        ]
-      },
-      {
-        "period": "晚上",
-        "timeRange": "",
-        "timeline": [
+          },
           {
             "time": "16:30",
             "type": "購物",
@@ -394,7 +388,13 @@
             "attractionIntro": "1. 車站步行直達便利; 2. 匯集最新各類家電; 3. 免稅加折價券省更多。",
             "attractionDuration": "1.0 hr",
             "specialNotes": "-"
-          },
+          }
+        ]
+      },
+      {
+        "period": "晚上",
+        "timeRange": "",
+        "timeline": [
           {
             "time": "18:00",
             "type": "用餐",
@@ -1488,7 +1488,7 @@
             "type": "景點",
             "city": "廣島",
             "event": "自由安排",
-            "description": "1. 再次前往宮島 2. 橫川 3. 廣島港 4. 最後補貨",
+            "description": "1. 再次前往宮島 2. 橫川 3. 廣島港 4. 十日市町/本川（文青） 5. 最後補貨",
             "transportType": "視情況",
             "transportPayment": "-",
             "mapUrl": null,
