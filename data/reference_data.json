@@ -178,5 +178,23 @@
     "mapUrl": "https://maps.google.com/maps?q=Onomichi+Nekonotepan+Factory&t=&z=15&ie=UTF8&iwloc=&output=embed",
     "description": "這是一家位於尾道山坡小徑上的超小型麵包店，店內空間狹窄到一次只能容納一名顧客。店內販售多種手工製作的麵包、司康與餅乾，以樸實且溫暖的口感著稱。充滿懷舊氛圍的店面是尾道散策必經的打卡熱點，價位平實，非常適合作為散步點心。",
     "notes": "通常於週二、三公休，每日售完即止；店內禁止攝影，外觀攝影請注意禮節。"
+  },
+  {
+    "category": "交通",
+    "city": "廣島",
+    "name": "芸陽巴士 (Geiyo Bus) 高速巴士",
+    "website": "https://www.geiyo.co.jp/expwy_bus.html",
+    "mapUrl": "https://maps.google.com/maps?q=Hiroshima+Geiyo+Bus&t=&z=15&ie=UTF8&iwloc=&output=embed",
+    "description": "芸陽巴士提供連接廣島市中心與廣島機場、竹原、東廣島等地的交通服務。是前往大久野島（兔島）轉乘點「竹原」的重要高速巴士營運商。此外也經營廣島機場利木津巴士，班次穩定且票價合理，是廣島縣內觀光與跨區移動的重要交通選擇。",
+    "notes": "官網包含詳細的時刻表、站點地圖及各路線票價資訊。"
+  },
+  {
+    "category": "交通",
+    "city": "廣島",
+    "name": "芸陽巴士 (Geiyo Bus)",
+    "website": "https://www.geiyo.co.jp/expwy_bus.html",
+    "mapUrl": "https://maps.google.com/maps?q=Hiroshima+Geiyo+Bus&t=&z=15&ie=UTF8&iwloc=&output=embed",
+    "description": "芸陽巴士是廣島縣內重要的客運公司，主要經營連結廣島市中心與東廣島、竹原、三原等地區的高速巴士。對於前往竹原老街（奔跑的兔子號）或西條酒藏地區的遊客來說是非常方便的選擇，車資透明且提供舒適的乘車體驗。",
+    "notes": "可使用PASPY、ICOCA等電子票證；部分熱門路線建議事先確認時刻表。"
   }
 ]
