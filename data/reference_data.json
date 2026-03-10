@@ -196,5 +196,14 @@
     "mapUrl": "https://maps.google.com/maps?q=Hiroshima+Geiyo+Bus&t=&z=15&ie=UTF8&iwloc=&output=embed",
     "description": "芸陽巴士是廣島縣內重要的客運公司，主要經營連結廣島市中心與東廣島、竹原、三原等地區的高速巴士。對於前往竹原老街（奔跑的兔子號）或西條酒藏地區的遊客來說是非常方便的選擇，車資透明且提供舒適的乘車體驗。",
     "notes": "可使用PASPY、ICOCA等電子票證；部分熱門路線建議事先確認時刻表。"
+  },
+  {
+    "category": "交通",
+    "city": "福岡",
+    "name": "九州西鐵 (西日本鐵道)",
+    "website": "https://www.nishitetsu.jp/train/rosen/",
+    "mapUrl": "https://maps.google.com/maps?q=Fukuoka+Nishitetsu+Fukuoka+Tenjin+Station&t=&z=15&ie=UTF8&iwloc=&output=embed",
+    "description": "西日本鐵道（西鐵）是連結福岡市中心天神地區與南部太宰府、柳川、大牟田等地的主要私鐵系統。其鐵道路線是前往著名景點太宰府天滿宮與柳川遊船的最便捷方式。西鐵同時經營龐大的巴士網絡，是福岡旅遊不可或缺的交通支柱。",
+    "notes": "主要營運區域位於福岡縣，非廣島地區，建議使用 SUNQ PASS 或西鐵特惠套票進行跨區旅遊規劃。"
   }
 ]
